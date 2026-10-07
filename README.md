@@ -35,4 +35,4 @@ but for now, this will be enough.
 Then to run, simply run ``npm run dev`` at the root of the repository directory. You will get an error, ignore that for now,
 as there is no server logic to run. You can connect to the rudimentary client end using the IP address printed in the terminal.
 
-You can begin modifying client files in ``focal-client/src/index.ts`` if you wish.
+You can begin modifying client files in ``focal-client`` if you wish.
