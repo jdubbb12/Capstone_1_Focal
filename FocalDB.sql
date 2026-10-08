@@ -6,7 +6,7 @@ create table interests (interest_id integer primary key generated always as iden
 
 create table user_interests (user_id integer references user_login(user_id) NOT NULL, interest_id integer references interests(interest_id) NOT NULL);
 
-create table artwork (artwork_id integer primary key generated always as identity, artwork_link text NOT NULL, creation_date date NOT NULL);
+create table artwork (artwork_id integer primary key generated always as identity, artwork_title varchar(75), artwork_description varchar(500), artwork_link text NOT NULL, creation_date date NOT NULL);
 
 create table artwork_interests (artwork_id integer references artwork(artwork_id) NOT NULL, interest_id integer references interests(interest_id) NOT NULL);
 
