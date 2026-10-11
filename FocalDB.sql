@@ -1,4 +1,4 @@
-create table user_login (user_id integer primary key generated always as identity, email varchar(150) unique NOT NULL, last_login date);
+create table user_login (user_id integer primary key generated always as identity, email varchar(150) unique NOT NULL, last_login date, username varchar(50) unique);
 
 create table user_pass_hash (user_id integer references user_login(user_id) NOT NULL, user_hash varchar(50) NOT NULL);
 
