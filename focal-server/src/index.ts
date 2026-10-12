@@ -1,1 +1,1 @@
-console.log('test server :)');
+// File left empty intentionally.
