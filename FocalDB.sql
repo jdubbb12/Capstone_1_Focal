@@ -24,7 +24,7 @@ create table artwork_revision (revision_id integer primary key generated always 
 
 
 
--- I used AI to generate this values for TESTS.
+-- I used AI to generate these values for TESTS.
 
 -- ============================================
 -- 1. USER LOGIN
