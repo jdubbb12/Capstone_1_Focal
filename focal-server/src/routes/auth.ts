@@ -19,6 +19,7 @@ const DUPLICATE_ITEM_VIOLATION = '23505'
 
 router.post('/signup', async (req: Request, res: Response) => {
     const { email, password, username } = req.body;
+    //console.log(req.body);
     const client = await database.connect();
 
     // We do this in a try, catch block as to catch any potential server-sided error and report that back as a JSON object.
@@ -60,6 +61,7 @@ router.post('/signup', async (req: Request, res: Response) => {
         if (error.code === DUPLICATE_ITEM_VIOLATION) { return res.status(400).json({ error: 'Email already registered.' }); }
 
         res.status(500).json({ error: 'An internal server error has occured.' });
+        //console.log(error);
     }
     finally {
         client.release(); // We disconnect from the server after everying is set.
@@ -72,7 +74,7 @@ router.post('/login', async (req: Request, res: Response) => {
     try {
         // For these queries, we are not inputting any user data onto the database, simply retrieving and updating the database. So, no need to ensure the connection.
         const result = await database.query(
-            `SELECT user_id, email, username, user_pass_hash.user_hash
+            `SELECT user_login.user_id, user_login.email, user_login.username, user_pass_hash.user_hash
             FROM user_login JOIN user_pass_hash ON user_login.user_id = user_pass_hash.user_id
             WHERE user_login.email = $1`,
             [email]
@@ -99,6 +101,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
     catch (error: any) {
         res.status(500).json({ error: "An internal server error has occured." });
+        //console.log(error)
     }
 });
 
