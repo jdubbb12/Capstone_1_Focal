@@ -41,7 +41,7 @@ and run ``npm install`` again. You will repeat this process for ``focal-server``
 but for now, this will be enough.
 
 #### Environment File
-Before running, ensure your proper environment settings are set. In focal-server, create a ``.env`` folder with variables for
+Before running, ensure your proper environment settings are set. In focal-server, create a ``.env`` file with variables for
 the port number for the server, the database port number, the URL used to access the database, and the secret for your JSON Web Token.
 
 **DO NOT UPLOAD THIS FILE ONTO THE REPOSITORY!** 
