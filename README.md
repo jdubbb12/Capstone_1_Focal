@@ -41,13 +41,7 @@ and run ``npm install`` again. You will repeat this process for ``focal-server``
 but for now, this will be enough.
 
 #### Environment File
-Before running, ensure your proper environment settings are set. In focal-server, create a ``.env`` file with variables for
-the port number for the server, the database port number, the URL used to access the database, and the secret for your JSON Web Token.
-
-**DO NOT UPLOAD THIS FILE ONTO THE REPOSITORY!** 
-
-It's generally not a good practice to upload Environment files as these are specific to you, and your development. It
-has an entry in the ``.gitignore`` to avoid conflicts and potential security issues further along. If you need more help with this, contact Diego.
+Please see [DOTENV.md](docs/DOTENV.md) for further information on creating and understanding environment files.
 
 ### Initialization
 Then to run, simply run ``npm run dev`` at the root of the repository directory. You will get an error, ignore that for now,
