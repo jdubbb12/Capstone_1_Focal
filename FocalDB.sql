@@ -8,7 +8,7 @@ create table user_interests (user_id integer references user_login(user_id) NOT 
 
 create table artwork (artwork_id integer primary key generated always as identity, artwork_title varchar(75), artwork_description varchar(500), artwork_link text NOT NULL, creation_date date NOT NULL, is_private bool);
 
-create table artwork_interests (artwork_id integer references artwork(artwork_id) NOT NULL, interest_id integer references interests(interest_id) NOT NULL);
+create table artwork_interests (artwork_id integer references artwork(artwork_id) NOT NULL, user_id int references user_login(user_id) NOT NULL, interest_id integer references interests(interest_id) NOT NULL);
 
 create table feedback (feedback_id integer primary key generated always as identity, artwork_id integer references artwork(artwork_id) NOT NULL, feedback_giver_id integer references user_login(user_id) NOT NULL, resolved bool NOT NULL, feedback_date date NOT NULL, feedback_content varchar(500) NOT NULL, feedback_frame integer, feedback_x integer, feedback_y integer, feedback_z integer)
 
