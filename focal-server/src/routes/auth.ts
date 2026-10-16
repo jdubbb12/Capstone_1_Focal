@@ -64,7 +64,7 @@ router.post('/signup', async (req: Request, res: Response) => {
         //console.log(error);
     }
     finally {
-        client.release(); // We disconnect from the server after everying is set.
+        client.release(); // We disconnect from the server after everything is set.
     }
 });
 
