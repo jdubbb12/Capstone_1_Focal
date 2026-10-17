@@ -29,3 +29,5 @@ focalSrv.use("/api/auth", authentication);
 focalSrv.listen(PORT, () => {
     console.log(`[SERVER]\tServer is listening on http://localhost:${PORT}`);
 });
+
+export default focalSrv;
