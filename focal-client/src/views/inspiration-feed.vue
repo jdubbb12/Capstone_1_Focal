@@ -4,7 +4,7 @@
 
 <template>
     <body style="background: #a6b793;">
-    <div class="d-flex flex-row justify-content-start align-items-center gap-3 px-4" style="background: #F5F3EB;"><img src="../assets/img/Focal%20Logo.png" width="96" height="72">
+    <div class="d-flex flex-row justify-content-start align-items-center gap-3 px-4" style="background: #F5F3EB;"><img src="../assets/img/logo.png" width="96" height="72">
         <div class="input-group rounded-pill flex-grow-1" style="border-width: 0px;border-color: var(--bs-secondary);"><input class="rounded-pill form-control" type="text" placeholder="Search..." style="border-width: 4px;border-color: #a6b793;border-top-color: rgb(33,;border-right-color: 37,;border-bottom-color: 41);border-left-color: 37,;max-width: 700px;"><button class="btn btn-primary rounded-circle" type="button" style="background: #a6b793;border-width: 0px;"><i class="fas fa-search"></i></button></div><button class="btn btn-primary" type="button" style="background: #465344;border-width: 0px;">Upload</button><a class="text-decoration-none" href="#" style="color: var(--bs-secondary);">Feed</a><a class="text-decoration-none" href="#" style="color: var(--bs-secondary);">Profile</a><span class="text-nowrap d-inline-flex align-items-center gap-2" style="color: var(--bs-secondary);"><i class="far fa-user" style="color: var(--bs-secondary);"></i><br>Full Name<br><br></span><i class="fas fa-chevron-down" style="color: var(--bs-secondary);"></i>
     </div>
     <h1 style="text-align: center;font-family: Adamina, serif;padding-top: 8px;padding-bottom: 5px;margin-bottom: 4px;font-size: 50px;margin-top: 16px;">Discover Inspiration</h1>
