@@ -1,12 +1,20 @@
 {
-	"name":"focal-project",
-	"private":true,
+	"name": "focal-project",
+	"workspaces": [
+		"focal-client",
+		"focal-server"
+	],
+	"private": true,
 	"scripts": {
-		"dev:client":"npm run dev --prefix focal-client",
-		"dev:server":"npm run dev --prefix focal-server",
-		"dev":"concurrently \"npm run dev:server\" \"npm run dev:client\""
+		"dev:client": "npm run dev --workspace=focal-client",
+		"dev:server": "npm run dev --workspace=focal-server",
+		"dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
 	},
-	"devDependencies":{
-		"concurrently":"^8.2.2"
+	"devDependencies": {
+		"concurrently": "^8.2.2"
+	},
+	"allowScripts": {
+		"bcrypt@6.0.0": true,
+		"esbuild@0.28.2": true
 	}
 }

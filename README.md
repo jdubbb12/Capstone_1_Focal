@@ -1,51 +1,26 @@
-### Capstone 1: Focal
+# Capstone 1: Focal
 
-This branch is a test for Sprint 1 to determine the proper frameworks
-for the client ends of the web app, and the server sided ends of the web app.
-**This is not final!** Please expect things to change as development continues
-and other group members chime in with ideas. - Diego
-
-## Justifications
-For this web app, web technologies are non-negotiable. Node.js for the server end likely
-makes our development easier by keeping our coding all in one language. Now, as for using
-JavaScript and [TypeScript](https://www.typescriptlang.org/), I'm not entirely sure, though I'm leaning twords using TS as it
-avoids notorious issues with types in JavaScript.
-
-As for the client side, I chose [Vue](https://vuejs.org/) with TS for this branch. React is the typical choice
-in these scenarios, but it is far more involved and heavier, and much different from
-typical web standards, which isn't bad, but as I have little web experience, I chose something
-simple.
-
-The 3D element of this is what I am most torn about, there are really, only two projects that are
-worth investigating. Babylon functions more like a game engine, and it's far more involved, which means
-less 3D coding at the cost of weight and less popular, as compared to Three.js which is far more known,
-but requires more effort and in-depth 3D coding.
-
-Last thing, is the actual desktop app aspect, really the only framework I'm aware of is Electron,
-used in things such as Discord, etc. Though, at the moment I'm not too concerned with that.
-
-## Database
-The database we will be using is PostgreSQL as some in our team have had experience with 
-Postgres and are familiar with how to create our database and the proper practices that go along with creating it.
-
-At the moment, we are simply running the database on our local machines and running a text file with SQL commands
-located in the main branch. In the future, we should move to a unified solution or a containerized solution, such as
-with Docker. But, until that is discussed, we will be using this method for our development.
+The repository for Focal, our creator platform. This platform runs off VueJS for our client end, NodeJS with Express for our server end, and PostgreSQL for our database
+holding user information. The main purpose for Focal is to provide creators a platform designed for creators that allows sharing of their works, allows for constructive criticisms, and supports images, videos, and 3D models.
 
 ## Setup
 
-For now, this is a extremely basic template file. If you wish to run this for development purposes, ensure
-you have [Node.js](https://nodejs.org/en/download) installed with NPM. Then, after installing Node, clone this repository and enter the repository folder.
-At the root, run ``npm install``. This will install dependencies for the entire project. Then, enter the ``focal-client`` folder
-and run ``npm install`` again. You will repeat this process for ``focal-server`` as well. This will likely be made into a script,
-but for now, this will be enough.
+To begin development, ensure you meet the following prerequisites:
+- NodeJS (v24 LTS)
+- PostgreSQL
 
-#### Environment File
+After these programs have installed, clone this repository, create and checkout a new local branch to ensure 
+development does not conflict with others work and progress.
+
+### Running
+1. Enter the repository folder using a terminal.
+2. Run ``npm install`` at the root directory. This may take a moment to install all the scripts and dependencies required for both the client and server ends.
+3. To run both the server and client together, simply run ``npm run dev`` at the root directory.
+4. If you wish to run the server and client separately, change your directory into your desired application and run ``npm run dev`` to run the client or server independently.
+
+#### Note on the Server
+The server's API requires PostgreSQL to be installed and running on the developer's computer. Create an environment file in ``focal-server`` with
+the proper connection settings for the server to work properly. You will get an uncaught exception if the port on the server is not configured.
+You also must ensure the database URL and port is configured correctly, otherwise the script will thrown an exception as it cannot find and connect to a undefined URL and port.
+
 Please see [DOTENV.md](docs/DOTENV.md) for further information on creating and understanding environment files.
-
-### Initialization
-Then to run, simply run ``npm run dev`` at the root of the repository directory. You will get an error, ignore that for now,
-as there is no server logic to run. You can connect to the rudimentary client end using the IP address printed in the terminal.
-
-
-You can begin modifying client files in ``focal-client`` if you wish.
