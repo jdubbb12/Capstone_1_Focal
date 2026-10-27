@@ -8,18 +8,32 @@ for the file and properly sending it to the client.
 */
 
 // FOR NOW, WE ARE ASSUMING THE USER HAS PROPER ACCESS, THESE ALL NEED A PROPER WEB TOKEN TO ACCESS IN ThE FUTURE
+// You can test API calls through using a REST client... Why did I never think about that?
 import { Router } from 'express';
 import path from "node:path";
 import Multer from 'multer';
 import type { Request, Response } from 'express';
-import { Pool } from "pg";
+// import { Pool } from "pg"; -- No database implementation at the moment.
 
 const router = Router();
-const uploadDir = path.resolve(process.cwd(), "uploads") // Capstone_1_Focal/focal-server/uploads/[files] - gets this through using the Current Working Directory
+const uploadDir = path.resolve(process.cwd(), "uploads/img/") // Capstone_1_Focal/focal-server/uploads/img/[files] - gets this through using the Current Working Directory
 const upload = Multer({ dest: uploadDir }); 
-// no idea if this is needed right now?
-// const database = new Pool({ connectionString: process.env.DATABASE_URL });
-// const DUPLICATE_ITEM_VIOLATION = '23505';
+
+// TODO: actually implement this
+//
+// const storage = Multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, uploadDir);
+//     },
+//
+//     filename: (req, file, cb) => {
+//         // FILENAME ON SERVER: focal_${DATE}${USERID}.EXTENSION -- in the future. (Example: focal_1793128614_1337.png)
+//         const srvFilename = `focal_${Date.now}`;
+//         const extension = path.extname(file.originalname);
+//         cb(null, srvFilename + extension);
+//     }
+// })
+
 
 // In order for ANY of the file uploads (POST) to work at all, the Vue file **must** have a form
 // with the following tags:
@@ -31,8 +45,18 @@ const upload = Multer({ dest: uploadDir });
 // Upload new art 
 router.post("/artworks", upload.single("image"), (req: Request, res: Response) => {
     if (req.file === undefined) {
-        res.status(400).json({ error: "An invalid file was sent and could not be processed."})
+        return res.status(400).json({ error: "An invalid file was sent and could not be processed."})
     }
+
+    console.log("[INFO]\t Client uploaded file: " + req.file.filename);
+
+    // We did it!
+    res.status(201).json({
+        message: "Successful upload.",
+        filename: req.file.filename,
+        size: req.file.size,
+        path: req.file.path
+    });
 });
 
 // Get a user's specfic artworks
