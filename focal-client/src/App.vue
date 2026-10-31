@@ -1,7 +1,9 @@
+
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import InspirationFeed from './views/InspirationFeed.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <RouterView />
 </template>
+
