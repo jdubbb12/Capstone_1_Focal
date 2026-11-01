@@ -10,7 +10,7 @@ for the file and properly sending it to the client.
 // FOR NOW, WE ARE ASSUMING THE USER HAS PROPER ACCESS, THESE ALL NEED A PROPER WEB TOKEN TO ACCESS IN ThE FUTURE
 // You can test API calls through using a REST client... Why did I never think about that?
 import { Router } from 'express';
-// TODO: implement proper deletion in case of error using Promises import { unlink } from "node:fs/promises";
+import { unlink } from "node:fs/promises";
 import path from "node:path";
 import Multer from 'multer';
 import type { Request, Response } from 'express';
@@ -86,7 +86,8 @@ router.post("/artworks", upload.single("image"), async (req: Request, res: Respo
     }
     catch (err: any) {
         await client.query("ROLLBACK"); // Something has gone *really* wrong, we need to roll back to the previous state.
-
+        await unlink(imgPath);
+        console.log("[ERROR]\tUpload failed. Deleted image.")
         // DUPLICATE_ITEM_VIOLATION refers to a PostgreSQL error code when an item is a duplicate, this piece of work already exists... somehow. if you reach here, you need a medal.
         // The only way I could "maybe" see this happen is if the server somehow manages to process everything at once, needs further testing...
         if (err.code === DUPLICATE_ITEM_VIOLATION) { return res.status(400).json({ error: 'Artwork already exists.' }); }
@@ -131,14 +132,39 @@ router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, r
 
 // Get a specific piece of art
 router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }>, res: Response) => {
+    const artworkIDNum = Number(req.params.artworkID);
 
+    // if the API somehow recieved the call /artworks/InvalidID/img or etc.
+    if (!Number.isInteger(artworkIDNum) || artworkIDNum <= 0) {
+        res.status(400).json({ error: "An invalid artwork ID was provided." });
+    }
+
+    try {
+        const result = await database.query(`
+        SELECT artwork_link FROM artwork WHERE artwork_id = $1`,
+            [artworkIDNum]);
+
+        if (result.rows.length === 0) { // The length being 0 means nothing was found, so we return 404.
+            return res.status(404).json({
+                error: "The given artwork ID could not be found."
+            });
+        }
+        const imagePath = path.resolve(process.cwd(), result.rows[0].artwork_link); // Essentially, we are creating the aboslute path for the server to get the image.
+        res.sendFile(imagePath);
+    }
+    catch (err: any) {
+        res.status(500).json({
+            error: "An internal server error has occured."
+        });
+        console.log(err);
+    }
 });
 
 // Get speciifc information about an artwork
 router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, res: Response) => {
     const artworkIDNum = Number(req.params.artworkID); // convert the string ID into an actual number you can use
 
-    // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
+    // if the API somehow recieved the call /artworks/:artworkID or etc.
     if (!Number.isInteger(artworkIDNum) || artworkIDNum <= 0) {
         res.status(400).json({ error: "An invalid artwork ID was provided." });
     }
