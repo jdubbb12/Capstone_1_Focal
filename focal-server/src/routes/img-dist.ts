@@ -101,17 +101,65 @@ router.post("/artworks", upload.single("image"), async (req: Request, res: Respo
 });
 
 // Get a user's specfic artworks
-router.get("/users/:userID/artworks", (req: Request<{ userID: string }>, res: Response) => {
+router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, res: Response) => {
+    const userIDNum = Number(req.params.userID); // convert the string ID into an actual number you can use
+
+    // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
+    if (!Number.isInteger(userIDNum) || userIDNum <= 0) {
+        res.status(400).json({ error: "An invalid user ID was provided." });
+    }
+
+
+    // const client = await database.connect();
+    try {
+        const result = await database.query(
+            `SELECT * FROM artwork WHERE user_id = $1
+            `, [userIDNum]);
+        res.status(200).json({
+            message: "Retrived the user's artwork.",
+            artwork: result.rows
+        })
+    }
+    catch (err: any) {
+        res.status(500).json({
+            error: "An internal server error has occured."
+        });
+        console.log(err);
+    }
 
 });
 
 // Get a specific piece of art
-router.get("/artworks/:artworkID/img", (req: Request<{ artworkID: string }>, res: Response) => {
+router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }>, res: Response) => {
 
 });
 
 // Get speciifc information about an artwork
-router.get("/artworks/:artworkID", (req: Request<{ artworkID: string }>, res: Response) => {
+router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, res: Response) => {
+    const artworkIDNum = Number(req.params.artworkID); // convert the string ID into an actual number you can use
+
+    // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
+    if (!Number.isInteger(artworkIDNum) || artworkIDNum <= 0) {
+        res.status(400).json({ error: "An invalid artwork ID was provided." });
+    }
+
+
+    // const client = await database.connect();
+    try {
+        const result = await database.query(
+            `SELECT * FROM artwork WHERE artwork_id = $1
+            `, [artworkIDNum]);
+        res.status(200).json({
+            message: "Retrived artwork.",
+            artwork: result.rows[0]
+        })
+    }
+    catch (err: any) {
+        res.status(500).json({
+            error: "An internal server error has occured."
+        });
+        console.log(err);
+    }
 
 });
 
