@@ -3,7 +3,7 @@ import AccountMenu from './AccountMenu.vue'
 </script>
 <template>
   <nav class="focal-nav d-flex flex-wrap align-items-center gap-3 px-4" aria-label="Main navigation">
-    <RouterLink :to="{ name: 'InspirationFeed' }" aria-label="Focal home"><img height="72" width="96" src="/assets/img/Focal%20Logo.png" alt="Focal logo" /></RouterLink>
+    <RouterLink :to="{ name: 'InspirationFeed' }" aria-label="Focal home"><img height="72" width="96" src="../assets/img/logo.png" alt="Focal logo" /></RouterLink>
     <div class="input-group flex-grow-1 nav-search">
       <input class="form-control rounded-pill" type="search" placeholder="Search (coming soon)" aria-label="Search (coming soon)" disabled />
     </div>

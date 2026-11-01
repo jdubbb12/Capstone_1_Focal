@@ -33,7 +33,7 @@ onUnmounted(() => { password.value = '' })
 <template>
   <main class="login-page">
     <div class="container py-4">
-      <RouterLink to="/" aria-label="Focal home"><img class="login-logo" src="/assets/img/Focal%20Logo.png" alt="Focal logo" /></RouterLink>
+      <RouterLink to="/" aria-label="Focal home"><img class="login-logo" src="../assets/img/logo.png" alt="Focal logo" /></RouterLink>
       <section class="login-card mx-auto text-start">
         <h1>Welcome back.</h1><p class="mb-4">Log in to your Focal account.</p>
         <p v-if="notice" class="alert alert-info" role="status">{{ notice }}</p>

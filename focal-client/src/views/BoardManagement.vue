@@ -72,7 +72,7 @@ import FocalNav from '../components/FocalNav.vue'
               <img
                 alt="Aerial view of turquoise ocean waves crashing onto a sandy beach"
                 height="177"
-                src="/assets/img/photo-1791234537439-b280ab80c590.jpg"
+                src="../assets/img/photo-1791234537439-b280ab80c590.jpg"
                 style="border-radius: 24px; width: 100%;"
                 width="248"
               />
@@ -107,7 +107,7 @@ import FocalNav from '../components/FocalNav.vue'
               <img
                 alt="Aerial view of the Brisbane River, Victoria Bridge, and South Bank at dusk"
                 height="177"
-                src="/assets/img/photo-1789758490778-78e757c7f28f.jpg"
+                src="../assets/img/photo-1789758490778-78e757c7f28f.jpg"
                 style="border-radius: 24px; width: 100%;"
                 width="248"
               />
@@ -142,7 +142,7 @@ import FocalNav from '../components/FocalNav.vue'
               <img
                 alt="An aerial view of many colorful kayaks arranged in a star pattern on water"
                 height="177"
-                src="/assets/img/photo-1790564689348-c7c9909f4fd5.jpg"
+                src="../assets/img/photo-1790564689348-c7c9909f4fd5.jpg"
                 style="border-radius: 24px; width: 100%;"
                 width="248"
               />

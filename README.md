@@ -1,8 +1,5 @@
 ### Capstone 1: Focal
 
-<<<<<<< Updated upstream
-This is a basic README to ensure a proper function of Git and GitHub.
-=======
 This branch is a test for Sprint 1 to determine the proper frameworks
 for the client ends of the web app, and the server sided ends of the web app.
 **This is not final!** Please expect things to change as development continues
@@ -49,4 +46,3 @@ Open http://localhost:5173. Signup, login, logout, profile/account editing, and 
 See [frontend integration](docs/FRONTEND_INTEGRATION.md) for the combined run commands and browser tests; artwork, boards, and annotation screens remain labeled previews.
 
 You can begin modifying client files in ``focal-client`` if you wish.
->>>>>>> Stashed changes

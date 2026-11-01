@@ -50,7 +50,7 @@ onUnmounted(() => { password.value = '' })
         <div class="text-center mb-2 pt-1">
           <RouterLink to="/" class="brand" aria-label="Focal home">
             <img
-              src="/assets/img/Focal%20Logo.png"
+              src="../assets/img/logo.png"
               alt="FOCAL Logo"
               class="signup-logo"
             />

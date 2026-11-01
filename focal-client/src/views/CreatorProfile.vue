@@ -88,7 +88,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1791234537439-b280ab80c590.jpg"
+                  src="../assets/img/photo-1791234537439-b280ab80c590.jpg"
                   alt="Aerial view of turquoise ocean waves crashing onto a sandy beach"
                   class="portfolio-image"
                 />
@@ -110,7 +110,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1789758490778-78e757c7f28f.jpg"
+                  src="../assets/img/photo-1789758490778-78e757c7f28f.jpg"
                   alt="Aerial view of the Brisbane River, Victoria Bridge, and South Bank at dusk"
                   class="portfolio-image"
                 />
@@ -132,7 +132,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1790564689348-c7c9909f4fd5.jpg"
+                  src="../assets/img/photo-1790564689348-c7c9909f4fd5.jpg"
                   alt="An aerial view of many colorful kayaks arranged in a star pattern on water"
                   class="portfolio-image"
                 />
@@ -154,7 +154,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1791350879692-0f88043725b7.jpg"
+                  src="../assets/img/photo-1791350879692-0f88043725b7.jpg"
                   alt="Iridescent soap film ribbons with blue and gold highlights on a grey background"
                   class="portfolio-image"
                 />
@@ -177,7 +177,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1791015759553-227f22b16087.jpg"
+                  src="../assets/img/photo-1791015759553-227f22b16087.jpg"
                   alt="A light grey vintage Volkswagen Beetle parked on a street in front of a building"
                   class="portfolio-image"
                 />
@@ -199,7 +199,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1791121902526-37047a1b93f4.jpg"
+                  src="../assets/img/photo-1791121902526-37047a1b93f4.jpg"
                   alt="A red fox with dark ears and paws on a grey gravel surface"
                   class="portfolio-image"
                 />
@@ -222,7 +222,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1778587614817-03d4bc181935.jpg"
+                  src="../assets/img/photo-1778587614817-03d4bc181935.jpg"
                   alt="Two people view a large, ornate painting in a museum"
                   class="portfolio-image"
                 />
@@ -244,7 +244,7 @@ const visibilityOpen = ref(false)
             <article class="card h-100 portfolio-card">
               <div class="card-body portfolio-card-body">
                 <img
-                  src="/assets/img/photo-1791231979059-f2a36c2a2e5d.jpg"
+                  src="../assets/img/photo-1791231979059-f2a36c2a2e5d.jpg"
                   alt="Three people walking past a bronze sculpture against a large concrete wall"
                   class="portfolio-image"
                 />

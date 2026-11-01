@@ -34,8 +34,9 @@ test.afterEach(async () => {
 })
 test.afterAll(() => pool.end())
 
-test('signup submit name stays stable when decorative icon CSS loads', async ({ page }) => {
+test('relocated signup image loads and submit name stays stable with icon CSS', async ({ page }) => {
   await page.goto('/')
+  await expect.poll(() => page.locator('.signup-logo').evaluate(image => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0)
   await page.addStyleTag({ content: '.bi-arrow-right::before { content: "→" !important; }' })
   await expect(page.locator('form button[type="submit"]')).toHaveAccessibleName('Create your account')
 })

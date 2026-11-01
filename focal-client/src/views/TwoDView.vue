@@ -35,7 +35,7 @@ function chooseFilter(value) {
             <div class="canvas-inner">
               <img
                 class="canvas-image"
-                src="/assets/img/photo-1791015759553-227f22b16087.jpg"
+                src="../assets/img/photo-1791015759553-227f22b16087.jpg"
                 alt="A light grey vintage Volkswagen Beetle parked on a street in front of a building"
               />
             </div>

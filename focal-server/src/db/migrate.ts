@@ -17,10 +17,19 @@ export async function migrate(pool: Pool, directory = new URL('../../migrations/
     if (!files.length) throw new Error('No migration SQL files found.');
     for (const name of files) {
       const sql = await readFile(new URL(name, directory), 'utf8');
-      const checksum = createHash('sha256').update(sql).digest('hex');
+      // Git may change checkout line endings without changing the migration.
+      // New records use LF consistently; execute the original SQL unchanged.
+      const canonicalSql = sql.replace(/\r\n/g, '\n');
+      const checksum = createHash('sha256').update(canonicalSql).digest('hex');
       const existing = await client.query('SELECT checksum FROM schema_migrations WHERE name = $1', [name]);
       if (existing.rowCount) {
-        if (existing.rows[0].checksum !== checksum) throw new Error(`Migration ${name} changed after application. Add a new migration instead.`);
+        // Older runners hashed raw checkout bytes. Accept their CRLF digest too,
+        // but only for this exact SQL text; never rewrite an applied record.
+        const legacyCrlfChecksum = createHash('sha256')
+          .update(canonicalSql.replace(/\n/g, String.fromCharCode(13, 10))).digest('hex');
+        if (existing.rows[0].checksum !== checksum && existing.rows[0].checksum !== legacyCrlfChecksum) {
+          throw new Error(`Migration ${name} changed after application. Add a new migration instead.`);
+        }
         continue;
       }
       await client.query('BEGIN');
