@@ -4,6 +4,14 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '@fortawesome/fontawesome-free/css/all.min.css' // Copied this from the HTML's css links, these should be the same, hopefully
 import "./style.css" // Otherwise, the scaling is messed up
 import App from './App.vue'
+<<<<<<< Updated upstream
+=======
+import router from './router'
+import { auth } from './stores/auth'
+import { setUnauthorizedHandler } from './lib/api'
+
+setUnauthorizedHandler(() => auth.invalidate(), () => auth.generation)
+>>>>>>> Stashed changes
 
 
 // Views

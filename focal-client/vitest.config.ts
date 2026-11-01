@@ -1,0 +1,3 @@
+import { defineConfig } from 'vitest/config'
+import vue from '@vitejs/plugin-vue'
+export default defineConfig({ plugins: [vue({ template: { transformAssetUrls: false } })], test: { environment: 'jsdom', include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'], restoreMocks: true } })
