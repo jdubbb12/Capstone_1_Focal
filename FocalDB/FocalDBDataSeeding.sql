@@ -12,9 +12,9 @@ VALUES
 -- 2. USER PROFILES
 INSERT INTO user_profile (user_id, profile_picture, is_visible)
 VALUES
-    (1, 'https://example.com/profiles/alice.jpg', TRUE),
-    (2, 'https://example.com/profiles/ben.jpg', TRUE),
-    (3, 'https://example.com/profiles/carla.jpg', TRUE);
+    (1, 'placeholder', TRUE),
+    (2, 'placeholder', TRUE),
+    (3, 'placeholder', TRUE);
 
 -- 3. PASSWORD HASH PLACEHOLDERS
 INSERT INTO user_pass_hash (user_id, user_hash)
@@ -46,13 +46,13 @@ INSERT INTO artwork
 VALUES
     (1, 'Neon Dreams',
      'A futuristic city glowing with neon lights.',
-     'https://example.com/artwork/1', '2026-01-10', TRUE),
+     'placeholder', '2026-01-10', TRUE),
     (2, 'Forest Sketch',
      'A detailed pencil sketch of a forest trail.',
-     'https://example.com/artwork/2', '2026-01-15', TRUE),
+     'placeholder', '2026-01-15', TRUE),
     (3, 'Autumn Reflections',
      'A warm landscape painting inspired by autumn.',
-     'https://example.com/artwork/3', '2026-02-02', TRUE);
+     'placeholder', '2026-02-02', TRUE);
 
 -- 7. ARTWORK INTERESTS
 INSERT INTO artwork_interests (artwork_id, interest_id)
@@ -99,9 +99,9 @@ VALUES
 INSERT INTO artwork_revision
     (artwork_id, prev_revision_link, current_revision_link, version_number)
 VALUES
-    (1, NULL, 'https://example.com/artwork/1/v1', '1.0'),
-    (1, 'https://example.com/artwork/1/v1',
-        'https://example.com/artwork/1/v2', '2.0'),
-    (2, NULL, 'https://example.com/artwork/2/v1', '1.0');
+    (1, NULL, 'placeholder', '1.0'),
+    (1, 'placeholder',
+        'placeholder', '2.0'),
+    (2, NULL, 'placeholder', '1.0');
 
 COMMIT;
