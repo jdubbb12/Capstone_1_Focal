@@ -127,7 +127,6 @@ router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, r
         });
         console.log(err);
     }
-
 });
 
 // Get a specific piece of art
@@ -195,7 +194,7 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
         return res.status(400).json({ error: "An invalid file was sent and could not be processed." })
     }
     const revisedArtworkID = Number(req.params.artworkID);
-    const currentImage = req.file.filename;
+    const currentImage = `uploads/img/${req.file.filename}`;
 
     // if the API somehow recieved an invalid call or etc.
     if (!Number.isInteger(revisedArtworkID) || revisedArtworkID <= 0) {
@@ -280,9 +279,31 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
     }
 });
 
-// Gets a list of revision of the artwork
-// router.get("/artworks/:artworkID/rev", (req: Request<{ artworkID: string }>, res: Response) => {
+// Gets a list of revisions of an artwork
+router.get("/artworks/:artworkID/rev", async (req: Request<{ artworkID: string }>, res: Response) => {
+    const artworkID = Number(req.params.artworkID); // convert the string ID into an actual number you can use
 
-// });
+    // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
+    if (!Number.isInteger(artworkID) || artworkID <= 0) {
+        res.status(400).json({ error: "An invalid artwork ID was provided." });
+    }
+    // const client = await database.connect();
+    try {
+        const result = await database.query(
+            `SELECT * FROM artwork_revision 
+             WHERE artwork_id = $1
+            `, [artworkID]);
+        res.status(200).json({
+            message: "Retrived the user's artwork.",
+            artwork: result.rows
+        })
+    }
+    catch (err: any) {
+        res.status(500).json({
+            error: "An internal server error has occured."
+        });
+        console.log(err);
+    }
+});
 
 export default router;
