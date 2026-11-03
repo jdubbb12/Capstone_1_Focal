@@ -134,7 +134,7 @@ router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, r
 router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }>, res: Response) => {
     const artworkIDNum = Number(req.params.artworkID);
 
-    // if the API somehow recieved the call /artworks/InvalidID/img or etc.
+    // if the API somehow recieved an invalid call or etc.
     if (!Number.isInteger(artworkIDNum) || artworkIDNum <= 0) {
         res.status(400).json({ error: "An invalid artwork ID was provided." });
     }
@@ -164,7 +164,7 @@ router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }
 router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, res: Response) => {
     const artworkIDNum = Number(req.params.artworkID); // convert the string ID into an actual number you can use
 
-    // if the API somehow recieved the call /artworks/:artworkID or etc.
+    // if the API somehow recieved an invalid call or etc.
     if (!Number.isInteger(artworkIDNum) || artworkIDNum <= 0) {
         res.status(400).json({ error: "An invalid artwork ID was provided." });
     }
@@ -190,9 +190,95 @@ router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, r
 });
 
 // Uploads a revision of a previously uploaded artwork
-// router.post("/artworks/:artworkID/rev", upload.single("image"), (req: Request<{ artworkID: string }>, res: Response) => {
+router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Request<{ artworkID: string }>, res: Response) => {
+    if (req.file === undefined) {
+        return res.status(400).json({ error: "An invalid file was sent and could not be processed." })
+    }
+    const revisedArtworkID = Number(req.params.artworkID);
+    const currentImage = req.file.filename;
 
-// });
+    // if the API somehow recieved an invalid call or etc.
+    if (!Number.isInteger(revisedArtworkID) || revisedArtworkID <= 0) {
+        return res.status(400).json({ error: "An invalid artwork ID was provided." });
+    }
+    let client;
+    // Since we are going to POST data, the bare minimum for this is a proper try, catch block.
+    try {
+        client = await database.connect();
+        await client.query("BEGIN");
+
+        // First, we get the current image we are replacing and its link.
+        const artwork = await client.query(`
+            SELECT artwork_link
+            FROM artwork
+            WHERE artwork_id = $1
+            FOR UPDATE`,
+            [revisedArtworkID]);
+
+
+        if (artwork.rows[0] === 0) {
+            throw new Error("prevArtworkLink is undefined.");
+        }
+        const prevArtworkLink = artwork.rows[0].artwork_link;
+
+        // Next, we check if we already have previous revisions, if we don't have any, we can assume that the link is the first revision.
+        const rev = await client.query(`
+            SELECT version_number
+            FROM artwork_revision
+            WHERE artwork_id = $1
+            ORDER BY revision_id DESC
+            LIMIT 1`,
+            [revisedArtworkID]);
+
+        // By default, when this is the first revision, this row wont exist. We are setting the default version as 2 because
+        // when this the new record is made, it signals a revision was made.
+        let revisionVersion: number = 2;
+
+        if (rev.rows.length > 0) {
+            revisionVersion = Number(rev.rows[0].version_number) + 1;
+        }
+
+        // Creating a new record holding a new revision of the image, and holding the older version.
+        const result = await client.query(`
+            INSERT INTO artwork_revision
+            (artwork_id, prev_revision_link, current_revision_link, version_number)
+            VALUES ($1, $2, $3, $4) RETURNING *`,
+            [revisedArtworkID, prevArtworkLink, currentImage, String(revisionVersion)]); // We convert the number back to a string as the database expects a VARCHAR, not a number.
+
+        const revisedArtwork = result.rows[0];
+
+        // We are now updating the original record and setting a new path to use in the previous GET route.
+        await client.query(`
+            UPDATE artwork
+            SET artwork_link = $1
+            WHERE artwork_id = $2
+            `,
+            [currentImage, revisedArtworkID])
+
+        await client.query("COMMIT");
+
+        // Sending back the JSON with the new Artwork information.
+        res.status(201).json({
+            message: "Successfully revised artwork.",
+            artwork: {
+                "artwork_id": revisedArtwork.artwork_id,
+                "new_artwork_link": revisedArtwork.current_revision_link,
+                "version": revisedArtwork.version_number
+            }
+        });
+    }
+    catch (err: any) {
+        await client?.query("ROLLBACK");
+        await unlink(currentImage);
+        res.status(500).json({
+            error: "An internal server error has occured."
+        });
+        console.log(err);
+    }
+    finally {
+        client?.release();
+    }
+});
 
 // Gets a list of revision of the artwork
 // router.get("/artworks/:artworkID/rev", (req: Request<{ artworkID: string }>, res: Response) => {
