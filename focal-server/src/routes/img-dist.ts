@@ -107,7 +107,7 @@ router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, r
 
     // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
     if (!Number.isInteger(userIDNum) || userIDNum <= 0) {
-        res.status(400).json({ error: "An invalid user ID was provided." });
+        return res.status(400).json({ error: "An invalid user ID was provided." });
     }
 
 
@@ -135,7 +135,7 @@ router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }
 
     // if the API somehow recieved an invalid call or etc.
     if (!Number.isInteger(artworkIDNum) || artworkIDNum <= 0) {
-        res.status(400).json({ error: "An invalid artwork ID was provided." });
+        return res.status(400).json({ error: "An invalid artwork ID was provided." });
     }
 
     try {
@@ -165,7 +165,7 @@ router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, r
 
     // if the API somehow recieved an invalid call or etc.
     if (!Number.isInteger(artworkIDNum) || artworkIDNum <= 0) {
-        res.status(400).json({ error: "An invalid artwork ID was provided." });
+        return res.status(400).json({ error: "An invalid artwork ID was provided." });
     }
 
 
@@ -285,7 +285,7 @@ router.get("/artworks/:artworkID/rev", async (req: Request<{ artworkID: string }
 
     // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
     if (!Number.isInteger(artworkID) || artworkID <= 0) {
-        res.status(400).json({ error: "An invalid artwork ID was provided." });
+        return res.status(400).json({ error: "An invalid artwork ID was provided." });
     }
     // const client = await database.connect();
     try {
