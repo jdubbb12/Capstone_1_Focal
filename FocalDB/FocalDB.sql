@@ -3,7 +3,7 @@ begin;
 create table user_login (user_id integer primary key generated always as identity, email varchar(150) unique NOT NULL, last_login date, username varchar(50) unique);
 
 -- columns user_id, profile_picture, is_visible
-create table user_profile (user_id integer NOT NULL, profile_picture text, is_visible bool, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade);
+create table user_profile (user_id integer primary key NOT NULL, profile_picture text, is_visible bool, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade);
 
 -- columns user_id, user_hash
 create table user_pass_hash (user_id integer NOT NULL, user_hash varchar(250) NOT NULL, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade);
