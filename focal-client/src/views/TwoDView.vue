@@ -153,79 +153,79 @@ function handleStatusToggle(id) {
 </script>
 
 <template>
-<div class="focal-2d-root">
-    <!-- Top Search Bar Header -->
-    <nav class="focal-navbar d-flex flex-row align-items-center gap-3 px-4">
+<div class="focal-2d-root">  
+  <!-- Top Search Bar Header -->
+    <div class="d-flex flex-row justify-content-start align-items-center gap-3 px-4" style="background: #F5F3EB;">
         <RouterLink to="/feed" aria-label="FOCAL Home">
           <img height="72" src="/assets/img/Focal%20Logo.png" width="96" />
         </RouterLink>
 
-        <!-- NEW: Search Bar -->
-        <div class="search-bar">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search..."
-          />
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="11" cy="11" r="7"></circle>
-            <line x1="20" y1="20" x2="16.35" y2="16.35"></line>
-          </svg>
-        </div>
-      
-        <button class="btn upload-button" type="button">Upload</button>
-          <a class="text-decoration-none nav-link-text" href="/feed">Feed</a>
-          <a class="text-decoration-none nav-link-text" href="/profile">Profile</a>
-          <div class="dropdown">
-            <button
-              class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              style="color: var(--bs-secondary); border: none;"
+        <div class="input-group rounded-pill flex-grow-1" style="border-width: 0px; border-color: var(--bs-secondary);">
+        <input
+          class="rounded-pill form-control"
+          placeholder="Search..."
+          style="border-width: 4px; border-color: #a6b793; max-width: 700px;"
+          type="text"
+        />
+        <button class="btn btn-primary rounded-circle" style="background: #a6b793; border-width: 0px;" type="button">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+
+      <button class="btn btn-primary" style="background: #465344; border-width: 0px;" type="button">
+        Upload
+      </button>
+
+      <RouterLink :to="{ name: 'InspirationFeed' }" class="text-decoration-none" style="color: var(--bs-secondary);">
+        Feed
+      </RouterLink>
+      <RouterLink :to="{ name: 'CreatorProfile' }" class="text-decoration-none" style="color: var(--bs-secondary);">
+        Profile
+      </RouterLink>
+
+      <div class="dropdown">
+        <button
+          class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          style="color: var(--bs-secondary); border: none;"
+        >
+          <i class="far fa-user"></i>
+          @username
+        </button>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <RouterLink
+              class="dropdown-item"
+              :to="{ name: 'EditProfile' }"
             >
-              <i class="far fa-user"></i>
-              @username
+              Edit Profile
+            </RouterLink>
+          </li>
+
+          <li>
+            <RouterLink
+              class="dropdown-item"
+              :to="{ name: 'BoardManagement' }"
+            >
+              Saved Boards
+            </RouterLink>
+          </li>
+
+          <li>
+            <hr class="dropdown-divider" />
+          </li>
+
+          <li>
+            <button class="dropdown-item" type="button">
+              Log Out
             </button>
-
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li>
-                <RouterLink
-                  class="dropdown-item"
-                  :to="{ name: 'EditProfile' }"
-                >
-                  Edit Profile
-                </RouterLink>
-              </li>
-
-              <li>
-                <RouterLink
-                  class="dropdown-item"
-                  :to="{ name: 'BoardManagement' }"
-                >
-                  Saved Boards
-                </RouterLink>
-              </li>
-
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
-
-              <li>
-                <button class="dropdown-item" type="button">
-                  Log Out
-                </button>
-              </li>
-            </ul>
-          </div>
-    </nav>
+          </li>
+        </ul>
+      </div>
+  </div>    
 
     <!-- Main Workspace -->
     <main class="workspace">
@@ -387,8 +387,10 @@ function handleStatusToggle(id) {
             v-for="item in filteredAnnotations"
             :key="item.id"
             class="annotation-card"
-            :class="{ active: selectedId === item.id }"
-            @click="selectAnnotation(item.id)"
+            :class="{ 
+              active: selectedId === item.id 
+            }"
+            @click="selectAnnotation(item)"
           >
             <span
               class="category-tag"
@@ -411,7 +413,7 @@ function handleStatusToggle(id) {
             </div>
 
             <div class="card-footer">
-              <button type="button" @click.stop="handleReply(item.id)">
+              <button type="button" @click.stop="toggleReplyBox(item.id)">
                 Reply
               </button>
               <button type="button" @click.stop="handleStatusToggle(item.id)">
@@ -426,10 +428,11 @@ function handleStatusToggle(id) {
 </template>
 
 <style scoped>
+
 .focal-2d-root {
   --bg-header: #f2f1ed;
   --bg-search: #f5f5f5;
-  --bg-main: #e2e4dc;
+  --bg-main: #a6b793;
   --bg-frame: #bcbfb8;
   --bg-canvas: #f5f5f5;
   --bg-sidebar: #ccccc8;
@@ -447,51 +450,6 @@ function handleStatusToggle(id) {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* 1. Top Search Header */
-.top-header {
-  height: 82px;
-  background-color: var(--bg-header);
-  display: flex;
-  align-items: center;
-  padding: 0 11%;
-  flex-shrink: 0;
-}
-
-.search-bar {
-  width: 580px;
-  height: 48px;
-  background-color: var(--bg-search);
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  padding: 0 22px;
-}
-
-.search-bar input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 15px;
-  color: var(--text-primary);
-}
-
-.search-bar input::placeholder {
-  color: #4a4a46;
-}
-
-.search-bar svg {
-  width: 18px;
-  height: 18px;
-  color: #2c2c2a;
-  cursor: pointer;
-}
 
 /* 2. Main Split Layout */
 .workspace {
@@ -732,7 +690,7 @@ function handleStatusToggle(id) {
 .sidebar-header h2 {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-secondary);
 }
 
 .cards-container {
