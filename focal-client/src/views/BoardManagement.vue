@@ -162,7 +162,7 @@
                 <span>Medium:</span>
                 <span>Notes:</span>
               </div>
-              <RouterLink :to="{ name: 'TwoDView' }" class="d-block">
+              <RouterLink :to="{ name: 'TwoDView' }" class="d-block text-decoration-none">
                 <div
                   class="text-center d-flex align-items-center px-2 py-1"
                   style="background: #465344; color: var(--bs-light); margin-top: 8px; padding-bottom: 4px; border-radius: 0px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
@@ -199,7 +199,7 @@
                 <span>Medium:</span>
                 <span>Notes:</span>
               </div>
-              <RouterLink :to="{ name: 'TwoDView' }" class="d-block">
+              <RouterLink :to="{ name: 'TwoDView' }" class="d-block text-decoration-none">
                 <div
                   class="text-center d-flex justify-content-between align-items-center px-2 py-1"
                   style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
@@ -236,7 +236,7 @@
                 <span>Medium:</span>
                 <span>Notes:</span>
               </div>
-              <RouterLink :to="{ name: 'TwoDView' }" class="d-block">
+              <RouterLink :to="{ name: 'TwoDView' }" class="d-block text-decoration-none">
                 <div
                   class="text-center d-flex justify-content-between align-items-center px-2 py-1"
                   style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
