@@ -162,15 +162,17 @@
                 <span>Medium:</span>
                 <span>Notes:</span>
               </div>
-              <div
-                class="text-center d-flex align-items-center px-2 py-1"
-                style="background: #465344; color: var(--bs-light); margin-top: 8px; padding-bottom: 4px; border-radius: 0px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
-              >
-                <span class="text-center w-100" style="color: rgb(248, 249, 250); font-size: 18px;">View Original</span>
-              </div>
-              <div class="text-center" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
-                <span style="color: rgb(248,249,250); font-size: 12px; text-align: center;">(View Feedback)</span>
-              </div>
+              <RouterLink :to="{ name: 'TwoDView' }" class="d-block">
+                <div
+                  class="text-center d-flex align-items-center px-2 py-1"
+                  style="background: #465344; color: var(--bs-light); margin-top: 8px; padding-bottom: 4px; border-radius: 0px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
+                >
+                  <span class="text-center w-100" style="color: rgb(248, 249, 250); font-size: 18px;">View Original</span>
+                </div>
+                <div class="text-center" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+                  <span style="color: rgb(248,249,250); font-size: 12px; text-align: center;">(View Feedback)</span>
+                </div>
+              </RouterLink>
               <button class="btn w-100" style="font-weight: bold; color: rgb(0,0,0);" type="button">
                 Move / Remove
               </button>
@@ -197,15 +199,17 @@
                 <span>Medium:</span>
                 <span>Notes:</span>
               </div>
-              <div
-                class="text-center d-flex justify-content-between align-items-center px-2 py-1"
-                style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
-              >
-                <span class="w-100" style="font-size: 18px;">View Original</span>
-              </div>
-              <div class="text-center" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
-                <span style="color: rgb(248,249,250); font-size: 12px; text-align: center;">(View Feedback)</span>
-              </div>
+              <RouterLink :to="{ name: 'TwoDView' }" class="d-block">
+                <div
+                  class="text-center d-flex justify-content-between align-items-center px-2 py-1"
+                  style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
+                >
+                  <span class="w-100" style="font-size: 18px;">View Original</span>
+                </div>
+                <div class="text-center" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+                  <span style="color: rgb(248,249,250); font-size: 12px; text-align: center;">(View Feedback)</span>
+                </div>
+              </RouterLink>
               <button class="btn w-100" style="font-weight: bold; color: rgb(0,0,0);" type="button">
                 Move / Remove
               </button>
@@ -232,15 +236,17 @@
                 <span>Medium:</span>
                 <span>Notes:</span>
               </div>
-              <div
-                class="text-center d-flex justify-content-between align-items-center px-2 py-1"
-                style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
-              >
-                <span class="text-center w-100" style="font-size: 18px;">View Original</span>
-              </div>
-              <div class="text-center" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
-                <span style="color: rgb(248,249,250); font-size: 12px; text-align: center;">(View Feedback)</span>
-              </div>
+              <RouterLink :to="{ name: 'TwoDView' }" class="d-block">
+                <div
+                  class="text-center d-flex justify-content-between align-items-center px-2 py-1"
+                  style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;"
+                >
+                  <span class="text-center w-100" style="font-size: 18px;">View Original</span>
+                </div>
+                <div class="text-center" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+                  <span style="color: rgb(248,249,250); font-size: 12px; text-align: center;">(View Feedback)</span>
+                </div>
+              </RouterLink>
               <button class="btn w-100" style="font-weight: bold; color: rgb(0,0,0);" type="button">
                 Move / Remove
               </button>
