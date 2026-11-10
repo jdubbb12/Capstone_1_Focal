@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-// import InspirationFeed from './views/InspirationFeed.vue'
+    console.log("Loaded page.");
 </script>
 
 <template>
