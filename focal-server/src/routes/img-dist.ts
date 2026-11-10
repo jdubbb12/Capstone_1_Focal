@@ -197,8 +197,9 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
             [revisedArtworkID]);
 
 
-        if (artwork.rows[0] === 0) {
-            return res.status(404).json({ error: "Artwork not found." });
+        if (artwork.rows.length === 0) {
+            // return res.status(404).json({ error: "Artwork not found." });
+            throw new Error("Artwork not found.")
         }
         const prevArtworkLink = artwork.rows[0].artwork_link;
 
@@ -255,6 +256,11 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
     catch (err: any) {
         await client?.query("ROLLBACK");
         await unlink(currentImage);
+        if (err instanceof Error && err.message === "Artwork not found.") {
+            res.status(404).json({
+                error: "Artwork could not be found."
+            })
+        }
         res.status(500).json({
             error: "An internal server error has occured."
         });

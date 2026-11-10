@@ -14,11 +14,18 @@ import { Pool } from 'pg';
 
 const router = Router();
 export const database = new Pool({ connectionString: process.env.DATABASE_URL }); // very temporary, in the future this should be its own script / middleware
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_key';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error("No JWT_SECRET detected!")
+}
 const DUPLICATE_ITEM_VIOLATION = '23505'
 
 router.post('/signup', async (req: Request, res: Response) => {
     const { email, password, username } = req.body;
+
+    if ((email || password || username) === undefined) {
+        throw new Error("Invalid inputs are not permitted.");
+    }
     //console.log(req.body);
     const client = await database.connect();
 
@@ -57,8 +64,11 @@ router.post('/signup', async (req: Request, res: Response) => {
     catch (error: any) {
         await client.query("ROLLBACK"); // Something has gone *really* wrong, we need to roll back to the previous state.
 
+        if (error instanceof Error && error.message === "Invalid inputs are not permitted.") {
+            return res.status(400).json({ error: "Invalid credentials." });
+        }
         // DUPLICATE_ITEM_VIOLATION refers to a PostgreSQL error code when an item is a duplicate, which means this account already exists.
-        if (error.code === DUPLICATE_ITEM_VIOLATION) { return res.status(400).json({ error: 'Email already registered.' }); }
+        if (error.code === DUPLICATE_ITEM_VIOLATION) { return res.status(400).json({ error: 'Account already registered.' }); }
 
         res.status(500).json({ error: 'An internal server error has occured.' });
         //console.log(error);
@@ -70,6 +80,10 @@ router.post('/signup', async (req: Request, res: Response) => {
 
 router.post('/login', async (req: Request, res: Response) => {
     const { email, password } = req.body;
+
+    if ((email || password) === undefined) {
+        throw new Error("Invalid inputs are not permitted.");
+    }
 
     try {
         // For these queries, we are not inputting any user data onto the database, simply retrieving and updating the database. So, no need to ensure the connection.
@@ -100,6 +114,9 @@ router.post('/login', async (req: Request, res: Response) => {
         res.status(200).json({ user: { id: user.user_id, email: user.email, username: user.username }, token });
     }
     catch (error: any) {
+        if (error instanceof Error && error.message === "Invalid inputs are not permitted.") {
+            return res.status(400).json({ error: "Invalid credentials." });
+        }
         res.status(500).json({ error: "An internal server error has occured." });
         //console.log(error)
     }
