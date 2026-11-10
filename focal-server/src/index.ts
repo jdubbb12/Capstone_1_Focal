@@ -1,6 +1,7 @@
 /*
 
-    index.ts - The main entry point into the backend.
+    index.ts
+    The main entry point into the backend.
     Requires a configured environment file to properly function.
 
  */
@@ -11,6 +12,7 @@ import Express from "express";
 import 'dotenv/config';
 import cors from "cors";
 import authentication from "./routes/auth.js";
+import imageDistribution from "./routes/img-dist.js"
 
 const PORT = process.env.PORT;
 
@@ -24,6 +26,7 @@ const focalSrv = Express();
 focalSrv.use(cors());
 focalSrv.use(Express.json());
 focalSrv.use("/api/auth", authentication);
+focalSrv.use("/api/dist", imageDistribution);
 
 // The last step, our server is setup and now ready to accept connections.
 focalSrv.listen(PORT, () => {
