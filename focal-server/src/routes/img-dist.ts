@@ -11,9 +11,7 @@ for the file and properly sending it to the client.
 // You can test API calls through using a REST client... Why did I never think about that?
 import { Router } from 'express';
 import { unlink } from "node:fs/promises";
-import fs from "node:fs"
 import path from "node:path";
-import Multer from 'multer';
 import type { Request, Response } from 'express';
 import { database } from './auth.js';
 import upload from "../middleware/storage-mw.js"
@@ -37,7 +35,7 @@ router.post("/artworks", upload.single("image"), async (req: Request, res: Respo
     const userID = req.body.userID; // BAD! BAD! BAD! no actual checking if authenticated !!!!!!!!! BAD!
     const title = req.body.title;
     const desc = req.body.desc;
-    const imgPath = `uploads/img/${req.file.filename}`;
+    const imgPath = path.relative(process.cwd(), `${req.file.destination}/${req.file.filename}`).replace(/\\/g, "/");; // bit dirty, but if I don't do this, the paths wont work on Linux/MacOS
     const visibility = true; // :( this is bad, but for now it'll be alright. i guess....
 
     console.log(`[SERVER]\tClient uploaded file ${req.file.filename}`);
@@ -178,7 +176,7 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
         return res.status(400).json({ error: "An invalid file was sent and could not be processed." })
     }
     const revisedArtworkID = Number(req.params.artworkID);
-    const currentImage = `uploads/img/${req.file.filename}`;
+    const currentImage = path.relative(process.cwd(), `${req.file.destination}/${req.file.filename}`).replace(/\\/g, "/");;
 
     // if the API somehow recieved an invalid call or etc.
     if (!Number.isInteger(revisedArtworkID) || revisedArtworkID <= 0) {
