@@ -6,7 +6,7 @@ create table user_login (user_id integer primary key generated always as identit
 create table user_profile (user_id integer NOT NULL, profile_picture text, is_visible bool, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade);
 
 -- columns user_id, user_hash
-create table user_pass_hash (user_id integer NOT NULL, user_hash varchar(50) NOT NULL, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade);
+create table user_pass_hash (user_id integer NOT NULL, user_hash varchar(255) NOT NULL, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade);
 
 -- columns interest_id, interest_name, description
 create table interests (interest_id integer primary key generated always as identity, interest_name varchar(100) unique NOT NULL, description varchar(250) NOT NULL);

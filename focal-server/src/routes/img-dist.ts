@@ -11,6 +11,7 @@ for the file and properly sending it to the client.
 // You can test API calls through using a REST client... Why did I never think about that?
 import { Router } from 'express';
 import { unlink } from "node:fs/promises";
+import fs from "node:fs"
 import path from "node:path";
 import Multer from 'multer';
 import type { Request, Response } from 'express';
@@ -24,7 +25,21 @@ const DUPLICATE_ITEM_VIOLATION = '23505'
 // Storage engine that stores images on our specified directory, and gives uploaded files a name and their extension.
 const storage = Multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir);
+        // By default, we upload into the misc. folder, as the user somehow managed to upload a file that has a unknown MIME type.
+        // MIME types can be found on IANA's website.
+        // Examples are: "image/png", "video/h264", "model/obj" or "application/json"
+        let folder = "uploads/misc/";
+        if (file.mimetype.startsWith("image/")) { 
+            folder = "uploads/img";
+        }
+        else if (file.mimetype.startsWith("video/")) { 
+            folder = "uploads/vid";
+        }
+        else if (file.mimetype.startsWith("model/")) {
+            folder = "uploads/obj";
+        }
+        fs.mkdirSync(folder, {recursive: true});
+        cb(null, path.resolve(process.cwd(), folder));
     },
 
     filename: (req, file, cb) => {
