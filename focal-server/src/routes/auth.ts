@@ -1,6 +1,6 @@
 /*
 
-auth.ts - Diego V.
+auth.ts
 Responsible for the server-side authentication checks.
 TODO: Proper testing and validation of this code.
 
@@ -13,7 +13,7 @@ import jsonWT from 'jsonwebtoken';
 import { Pool } from 'pg';
 
 const router = Router();
-export const database = new Pool({ connectionString: process.env.DATABASE_URL }); // very temporary, in the future this should be its own script
+export const database = new Pool({ connectionString: process.env.DATABASE_URL }); // very temporary, in the future this should be its own script / middleware
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_key';
 const DUPLICATE_ITEM_VIOLATION = '23505'
 

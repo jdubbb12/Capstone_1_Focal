@@ -1,6 +1,7 @@
 /*
 
-    index.ts - The main entry point into the backend.
+    index.ts
+    The main entry point into the backend.
     Requires a configured environment file to properly function.
 
  */

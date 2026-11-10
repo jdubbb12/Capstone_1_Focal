@@ -1,6 +1,6 @@
 /*
 
-image-dist.ts - Diego V.
+image-dist.ts
 API route for uploading, distributing and getting artworks from the
 server, using the backend to contact the database, to retrieve the filepath
 for the file and properly sending it to the client.
@@ -16,41 +16,10 @@ import path from "node:path";
 import Multer from 'multer';
 import type { Request, Response } from 'express';
 import { database } from './auth.js';
-
+import upload from "../middleware/storage-mw.js"
 
 const router = Router();
-const uploadDir = path.resolve(process.cwd(), "uploads/img/") // Capstone_1_Focal/focal-server/uploads/img/[files] - gets this through using the Current Working Directory
 const DUPLICATE_ITEM_VIOLATION = '23505'
-
-// Storage engine that stores images on our specified directory, and gives uploaded files a name and their extension.
-const storage = Multer.diskStorage({
-    destination: (req, file, cb) => {
-        // By default, we upload into the misc. folder, as the user somehow managed to upload a file that has a unknown MIME type.
-        // MIME types can be found on IANA's website.
-        // Examples are: "image/png", "video/h264", "model/obj" or "application/json"
-        let folder = "uploads/misc/";
-        if (file.mimetype.startsWith("image/")) { 
-            folder = "uploads/img";
-        }
-        else if (file.mimetype.startsWith("video/")) { 
-            folder = "uploads/vid";
-        }
-        else if (file.mimetype.startsWith("model/")) {
-            folder = "uploads/obj";
-        }
-        fs.mkdirSync(folder, {recursive: true});
-        cb(null, path.resolve(process.cwd(), folder));
-    },
-
-    filename: (req, file, cb) => {
-        // FILENAME ON SERVER: focal_${DATE}_${UUID}_${REV}.EXTENSION -- in the future. (Example: focal_1793128614_1337_v2.png)
-        const srvFilename = `focal_${Date.now()}`;
-        const extension = path.extname(file.originalname);
-        cb(null, srvFilename + extension);
-    }
-})
-
-const upload = Multer({ storage });
 
 // In order for ANY of the file uploads (POST) to work at all, the Vue file **must** have a form
 // with the following tags:
@@ -231,7 +200,7 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
 
 
         if (artwork.rows[0] === 0) {
-            throw new Error("prevArtworkLink is undefined.");
+            return res.status(404).json({ error: "Artwork not found." });
         }
         const prevArtworkLink = artwork.rows[0].artwork_link;
 
@@ -250,6 +219,10 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
 
         if (rev.rows.length > 0) {
             revisionVersion = Number(rev.rows[0].version_number) + 1;
+        }
+
+        if (!Number.isInteger(revisionVersion)) {
+            throw new Error("Invalid revision version. Use an integer.")
         }
 
         // Creating a new record holding a new revision of the image, and holding the older version.
