@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 // The discovery cards currently use sample data from the Bootstrap Studio design.
 // Navigation uses the existing named routes in src/router/index.ts.
+const favorites = ref<Record<number, boolean>>({})
 </script>
 
 <template>
@@ -117,10 +120,20 @@
                 <img alt="Aerial view of turquoise ocean waves crashing onto a sandy beach" height="177" src="/assets/img/photo-1791234537439-b280ab80c590.jpg" style="border-radius: 24px; width: 100%;" width="248"/>
               </RouterLink>
               <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; padding-bottom: 4px; border-radius: 0px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-                <span>Title</span>
-                <i class="far fa-star"></i>
+                <span>Title</span>  
+                <!-- Favorite button -->                           
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[1] = !favorites[1]"
+                  :aria-pressed="!!favorites[1]"
+                  :aria-label="favorites[1] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[1] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Painting</span>
               </div>
             </div>
@@ -136,9 +149,19 @@
               </RouterLink>
               <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                 <span>Title</span>
-                <i class="far fa-star"></i>
+                <!-- Favorite button -->                             
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[2] = !favorites[2]"
+                  :aria-pressed="!!favorites[2]"
+                  :aria-label="favorites[2] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[2] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Crafts</span>
               </div>
             </div>
@@ -154,9 +177,19 @@
               </RouterLink>
               <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                 <span>Title</span>
-                <i class="far fa-star"></i>
+                <!-- Favorite button -->
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[3] = !favorites[3]"
+                  :aria-pressed="!!favorites[3]"
+                  :aria-label="favorites[3] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[3] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Video</span>
               </div>
             </div>
@@ -172,9 +205,19 @@
               </RouterLink>
               <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                 <span>Title</span>
-                <i class="far fa-star"></i>
+                <!-- Favorite button -->
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[4] = !favorites[4]"
+                  :aria-pressed="!!favorites[4]"
+                  :aria-label="favorites[4] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[4] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">3D Animation</span>
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Video</span>
               </div>
@@ -191,9 +234,19 @@
               </RouterLink>
                 <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                 <span>Title</span>
-                <i class="far fa-star"></i>
+                <!-- Favorite button -->
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[5] = !favorites[5]"
+                  :aria-pressed="!!favorites[5]"
+                  :aria-label="favorites[5] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[5] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Video</span>
               </div>
             </div>
@@ -209,9 +262,19 @@
               </RouterLink>
               <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                 <span>Title</span>
-                <i class="far fa-star"></i>
+                <!-- Favorite button -->
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[6] = !favorites[6]"
+                  :aria-pressed="!!favorites[6]"
+                  :aria-label="favorites[6] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[6] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Crafts</span>
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Video</span>
               </div>
@@ -228,9 +291,19 @@
               </RouterLink>
               <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                 <span>Title</span>
-                <i class="far fa-star"></i>
+                <!-- Favorite button -->
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[7] = !favorites[7]"
+                  :aria-pressed="!!favorites[7]"
+                  :aria-label="favorites[7] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[7] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">Painting</span>
               </div>
             </div>
@@ -246,9 +319,19 @@
               </RouterLink>
               <div class="d-flex justify-content-between align-items-center px-2 py-1" style="background: #465344; color: var(--bs-light); margin-top: 8px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
                 <span>Title</span>
-                <i class="far fa-star"></i>
+                <!-- Favorite button -->
+                <button
+                  type="button"
+                  class="btn p-0 border-0"
+                  @click="favorites[8] = !favorites[8]"
+                  :aria-pressed="!!favorites[8]"
+                  :aria-label="favorites[8] ? 'Remove from favorites' : 'Add to favorites'"
+                  style="background: transparent; color: white;"
+                >
+                  <i :class="favorites[8] ? 'fas fa-star' : 'far fa-star'"></i>
+                </button>
               </div>
-              <div style="background: #465344; border-radius: 1px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; border-top-left-radius: 0px; border-top-right-radius: 0px;">
+              <div class="d-flex justify-content-start" style="background: #465344; border-radius: 1px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; border-top-left-radius: 0px; border-top-right-radius: 0px;">
                 <span class="badge" style="background: #DCE5D3; color: #354335; margin-left: 5px; margin-bottom: 5px;">3D Animation</span>
               </div>
             </div>
