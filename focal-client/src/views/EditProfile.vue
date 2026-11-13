@@ -30,16 +30,49 @@ function selectPhoto(event: Event) {
   savedMessage.value = ''
 }
 
-function saveProfile() {
-  errorMessage.value = ''
+
+const saveProfile = async () => {
   savedMessage.value = ''
-  if (!displayName.value.trim() || !username.value.trim() || !email.value.trim()) {
-    errorMessage.value = 'Display name, username, and email are required.'
+
+  const token = localStorage.getItem('client-credentials')
+
+  if (!token) {
+    savedMessage.value = 'Please log in to save your profile.'
     return
   }
-  // Frontend prototype only: no backend endpoint or shared profile state yet.
-  savedMessage.value = 'Your changes are ready.'
+
+  try {
+    const response = await fetch(
+      'http://localhost:3000/api/profile',
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          displayName: displayName.value,
+          bio: bio.value,
+          creatorType: creatorType.value
+        })
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Could not save profile.')
+    }
+
+    savedMessage.value = 'Profile saved successfully!'
+  } catch (error) {
+    savedMessage.value =
+      error instanceof Error
+        ? error.message
+        : 'Could not save profile.'
+  }
 }
+
 
 onUnmounted(() => {
   if (previewUrl) URL.revokeObjectURL(previewUrl)
