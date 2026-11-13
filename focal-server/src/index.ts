@@ -13,6 +13,7 @@ import 'dotenv/config';
 import cors from "cors";
 import authentication from "./routes/auth.js";
 import imageDistribution from "./routes/img-dist.js"
+import { authToken, type AuthRequest } from "./middleware/auth-mw.js";
 
 const PORT = process.env.PORT;
 
@@ -27,6 +28,14 @@ focalSrv.use(cors());
 focalSrv.use(Express.json());
 focalSrv.use("/api/auth", authentication);
 focalSrv.use("/api/dist", imageDistribution);
+
+// TESTING PURPOSES
+focalSrv.get("/auth-test", authToken, (req: AuthRequest, res) => {
+    res.json({
+        message: "Successfully used middleware to properly authenticate yourself to the Focal server.",
+        user: req.user
+    });
+});
 
 // The last step, our server is setup and now ready to accept connections.
 focalSrv.listen(PORT, () => {
