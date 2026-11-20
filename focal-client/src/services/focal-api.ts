@@ -24,6 +24,7 @@ api.interceptors.response.use(
     (response) => response, // if everything is good, we move on
     (error) => {
         if (error.response && error.response.status === 401) { // otherwise, we end up here. go back and login for me.
+            console.log(error)
             localStorage.removeItem("focal-token");
             localStorage.removeItem("focal-user");
             window.location.href = "/login";

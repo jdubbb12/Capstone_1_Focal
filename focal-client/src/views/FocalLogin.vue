@@ -1,35 +1,40 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import {ref, computed} from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth-str";
 
-const router = useRouter()
-const API_BASE = 'http://localhost:3000'
-const showPassword = ref(false)
-const submitting = ref(false)
-const errorMessage = ref('')
-const password = ref('')
-const attempted = ref(false)
-const email = ref('')
-const validEmail = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()))
-async function submitLogin() {
-  attempted.value = true
-  errorMessage.value = ''
-  if (!validEmail.value || !password.value) return
-  submitting.value = true
+const email = ref("");
+const password = ref("");
+const errorMessage = ref("");
+const submitting = ref(false);
+const showPassword = ref(false);
+const attempted = ref(false);
+const validEmail = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()));
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+const loginHandler = async () => {
+  console.log("test")
+  submitting.value = true;
+  errorMessage.value = "";
+
   try {
-    const response = await fetch(`${API_BASE}/api/auth/login`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value.trim(), password: password.value })
-    })
-    const data = await response.json()
-    if (!response.ok || !data.token) throw new Error(data.error || 'Login failed.')
-    localStorage.setItem('client-credentials', data.token)
-    await router.push('/feed')
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Unable to log in.'
-  } finally { submitting.value = false }
+    await authStore.login({
+      email: email.value,
+      password: password.value,
+    });
+    router.push({ name: "profile"})
+  }
+  catch (err: any) {
+    err.response?.data?.message || "Failed to connect to server. Try again later.";
+  }
+  finally {
+    submitting.value = false;
+  }
 }
 </script>
+
 
 <template>
   <div class="focal-auth-page">
@@ -41,7 +46,7 @@ async function submitLogin() {
         <div class="login-card mx-auto mt-4 mt-md-5">
           <h1 class="headline mb-3">Welcome back.</h1>
           <p class="subtext mb-4">Log in to pick up where you left off with the art you love.</p>
-          <form novalidate @submit.prevent="submitLogin">
+          <form novalidate @submit.prevent="loginHandler">
             <div class="mb-3">
               <label for="login-email" class="form-label text-start w-100">Email address</label>
               <input id="login-email" v-model="email" type="email" class="form-control" :class="{ 'is-invalid': attempted && !validEmail }" placeholder="you@example.com" autocomplete="email" required />
