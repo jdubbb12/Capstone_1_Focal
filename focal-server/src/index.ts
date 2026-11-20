@@ -14,6 +14,7 @@ import cors from "cors";
 import authentication from "./routes/auth.js";
 import imageDistribution from "./routes/img-dist.js"
 import { authToken, type AuthRequest } from "./middleware/auth-mw.js";
+import profile from "./routes/profile.js";
 
 const PORT = process.env.PORT;
 
@@ -37,6 +38,7 @@ focalSrv.get("/auth-test", authToken, (req: AuthRequest, res) => {
     });
 });
 
+focalSrv.use("/api/profile", profile);
 // The last step, our server is setup and now ready to accept connections.
 focalSrv.listen(PORT, () => {
     console.log(`[SERVER]\tServer is listening on http://localhost:${PORT}`);
