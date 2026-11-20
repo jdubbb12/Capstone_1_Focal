@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth-str'
+
+// Use the authentication store
+const authStore = useAuthStore();
 
 // Sample creator information from the Bootstrap Studio design.
 const fullName = ref('First & Last Name')
@@ -15,7 +19,7 @@ const visibilityOpen = ref(false)
 
 // Retrieve profile information from PostgreSQL
 const loadProfile = async () => {
-  const token = localStorage.getItem('client-credentials')
+  const token = localStorage.getItem('focal-token')
 
   if (!token) {
     profileError.value = 'Please log in to view your profile.'
@@ -126,7 +130,7 @@ onMounted(() => {
           </li>
 
           <li>
-            <button class="dropdown-item" type="button">
+            <button class="dropdown-item" type="button" @click="authStore.logout()">
               Log Out
             </button>
           </li>
