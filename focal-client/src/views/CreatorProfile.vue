@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth-str'
+import api from '../services/focal-api'
 
 // Use the authentication store
 const authStore = useAuthStore();
@@ -19,41 +20,19 @@ const visibilityOpen = ref(false)
 
 // Retrieve profile information from PostgreSQL
 const loadProfile = async () => {
-  const token = localStorage.getItem('focal-token')
+    try {
+        const response = await api.get('/profile')
+        const data = response.data
 
-  if (!token) {
-    profileError.value = 'Please log in to view your profile.'
-    return
-  }
+        fullName.value = data.display_name || 'First & Last Name'
+        bio.value = data.bio || 'No bio added yet.'
+        creatorType.value = data.creator_type || 'Digital Artist'
 
-  try {
-    const response = await fetch(
-      'http://localhost:3000/api/profile',
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Could not load profile.')
+        profileError.value = ''
+    } catch (error) {
+        profileError.value = 'Could not load profile.'
+        console.error(error)
     }
-
-    fullName.value = data.display_name || 'First & Last Name'
-    bio.value = data.bio || 'No bio added yet.'
-    creatorType.value = data.creator_type || 'Digital Artist'
-
-    profileError.value = ''
-  } catch (error) {
-    profileError.value =
-      error instanceof Error
-        ? error.message
-        : 'Could not load profile.'
-  }
 }
 
 // Load saved information when the page opens

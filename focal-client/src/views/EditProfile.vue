@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../services/focal-api'
 
 const router = useRouter()
 
@@ -33,43 +34,20 @@ function selectPhoto(event: Event) {
 
 const saveProfile = async () => {
   savedMessage.value = ''
-
-  const token = localStorage.getItem('client-credentials')
-
-  if (!token) {
-    savedMessage.value = 'Please log in to save your profile.'
-    return
-  }
+  errorMessage.value = ''
 
   try {
-    const response = await fetch(
-      'http://localhost:3000/api/profile',
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          displayName: displayName.value,
-          bio: bio.value,
-          creatorType: creatorType.value
-        })
-      }
-    )
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Could not save profile.')
-    }
+    await api.put('/profile', {
+    displayName: displayName.value,
+    username: username.value,
+    bio: bio.value,
+    creatorType: creatorType.value
+  })
 
     savedMessage.value = 'Profile saved successfully!'
   } catch (error) {
-    savedMessage.value =
-      error instanceof Error
-        ? error.message
-        : 'Could not save profile.'
+    errorMessage.value = 'Could not save profile.'
+    console.error(error)
   }
 }
 
