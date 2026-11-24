@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth-str'
+
+// Use the authentication store
+const authStore = useAuthStore();
 
 // Sample creator information from the Bootstrap Studio design.
 const fullName = ref('First & Last Name')
@@ -8,9 +12,55 @@ const creatorType = ref('Digital Artist')
 const projects = ref(8)
 const favorites = ref(24)
 const collections = ref(3)
+const profileError = ref('')
 // const search = ref('')
 const visibility = ref('Visibility')
 const visibilityOpen = ref(false)
+
+// Retrieve profile information from PostgreSQL
+const loadProfile = async () => {
+  const token = localStorage.getItem('focal-token')
+
+  if (!token) {
+    profileError.value = 'Please log in to view your profile.'
+    return
+  }
+
+  try {
+    const response = await fetch(
+      'http://localhost:3000/api/profile',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Could not load profile.')
+    }
+
+    fullName.value = data.display_name || 'First & Last Name'
+    bio.value = data.bio || 'No bio added yet.'
+    creatorType.value = data.creator_type || 'Digital Artist'
+
+    profileError.value = ''
+  } catch (error) {
+    profileError.value =
+      error instanceof Error
+        ? error.message
+        : 'Could not load profile.'
+  }
+}
+
+// Load saved information when the page opens
+onMounted(() => {
+  loadProfile()
+})
+
 </script>
 
 <template>
@@ -80,7 +130,7 @@ const visibilityOpen = ref(false)
           </li>
 
           <li>
-            <button class="dropdown-item" type="button">
+            <button class="dropdown-item" type="button" @click="authStore.logout()">
               Log Out
             </button>
           </li>

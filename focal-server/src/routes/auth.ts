@@ -23,7 +23,7 @@ const DUPLICATE_ITEM_VIOLATION = '23505'
 router.post('/signup', async (req: Request, res: Response) => {
     const { email, password, username } = req.body;
 
-    if ((email || password || username) === undefined) {
+    if (!email || !password || !username) {
         throw new Error("Invalid inputs are not permitted.");
     }
     //console.log(req.body);
@@ -58,7 +58,7 @@ router.post('/signup', async (req: Request, res: Response) => {
         const token = jsonWT.sign({ userID: newUser.user_id }, JWT_SECRET, { expiresIn: '7d' });
 
         // Returning to the client their user account and the session token.
-        res.status(201).json({ user: newUser, token });
+        res.status(201).json({ user: { id: newUser.user_id, email: newUser.email, username: newUser.username }, token });
     }
 
     catch (error: any) {
@@ -81,8 +81,8 @@ router.post('/signup', async (req: Request, res: Response) => {
 router.post('/login', async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    if ((email || password) === undefined) {
-        throw new Error("Invalid inputs are not permitted.");
+    if (!email || !password) {
+        return res.status(400).json({ error: "Invalid credentials. Email and password are required." });
     }
 
     try {
