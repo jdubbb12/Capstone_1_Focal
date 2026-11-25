@@ -1,8 +1,10 @@
-
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { database } from './auth.js';
+import path from 'node:path';
+import { unlink } from 'node:fs/promises';
+import upload from '../middleware/storage-mw.js';
 
 const router = Router();
 
@@ -206,5 +208,148 @@ router.put('/', async (req: Request, res: Response) => {
   }
 });
 
+// Upload the logged-in user's profile picture
+router.post('/picture', (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  const secret = process.env.JWT_SECRET;
+
+  if (!token) {
+    return res.status(401).json({
+      error: 'Authentication required.'
+    });
+  }
+
+  if (!secret) {
+    return res.status(500).json({
+      error: 'Server authentication is not configured.'
+    });
+  }
+
+  let userId: number;
+
+  try {
+    const decoded = jwt.verify(token, secret);
+
+    if (
+      typeof decoded === 'string' ||
+      typeof decoded.userID !== 'number'
+    ) {
+      return res.status(401).json({
+        error: 'Invalid token.'
+      });
+    }
+
+    userId = decoded.userID;
+  } catch {
+    return res.status(401).json({
+      error: 'Invalid or expired token.'
+    });
+  }
+
+  upload.single('image')(req, res, async (error) => {
+    if (error || !req.file) {
+      return res.status(400).json({
+        error: 'Could not upload profile picture.'
+      });
+    }
+
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/webp'
+    ];
+
+    if (
+      !allowedTypes.includes(req.file.mimetype) ||
+      req.file.size > 5 * 1024 * 1024
+    ) {
+      await unlink(req.file.path).catch(console.error);
+
+      return res.status(400).json({
+        error: 'Choose a JPG, PNG, or WebP image under 5 MB.'
+      });
+    }
+
+    const imagePath = path.relative(
+      process.cwd(),
+      req.file.path
+    ).replace(/\\/g, '/');
+
+    try {
+      await database.query(
+        `INSERT INTO user_profile (user_id, profile_picture)
+         VALUES ($1, $2)
+         ON CONFLICT (user_id)
+         DO UPDATE SET
+           profile_picture = EXCLUDED.profile_picture`,
+        [userId, imagePath]
+      );
+
+      return res.status(200).json({
+        message: 'Profile picture updated successfully.',
+        profile_picture: imagePath
+      });
+
+    } catch (error) {
+      await unlink(req.file.path).catch(console.error);
+      console.error('Profile picture upload error:', error);
+
+      return res.status(500).json({
+        error: 'Could not save profile picture.'
+      });
+    }
+  });
+});
+
+// Retrieve a user's profile picture
+router.get('/picture/:userID', async (req: Request, res: Response) => {
+  const userId = Number(req.params.userID);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return res.status(400).json({
+      error: 'Invalid user ID.'
+    });
+  }
+
+  try {
+    const result = await database.query(
+      `SELECT profile_picture
+       FROM user_profile
+       WHERE user_id = $1`,
+      [userId]
+    );
+
+    if (
+      result.rows.length === 0 ||
+      !result.rows[0].profile_picture ||
+      result.rows[0].profile_picture === 'placeholder'
+    ) {
+      return res.status(404).json({
+        error: 'Profile picture not found.'
+      });
+    }
+
+    const imageRoot = path.resolve(process.cwd(), 'uploads/img');
+    const imagePath = path.resolve(
+      process.cwd(),
+      result.rows[0].profile_picture
+    );
+
+    if (path.dirname(imagePath) !== imageRoot) {
+      return res.status(400).json({
+        error: 'Invalid image path.'
+      });
+    }
+
+    return res.sendFile(imagePath);
+
+  } catch (error) {
+    console.error('Profile picture retrieval error:', error);
+
+    return res.status(500).json({
+      error: 'Could not retrieve profile picture.'
+    });
+  }
+});
 
 export default router;

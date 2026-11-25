@@ -8,6 +8,8 @@ const authStore = useAuthStore();
 
 // Sample creator information from the Bootstrap Studio design.
 const fullName = ref('First & Last Name')
+const defaultImage = '/assets/img/photo-1779896411959-26149949fdc3.jpg'
+const profileImage = ref(defaultImage)
 const bio = ref('This is where the user will put their bio')
 const creatorType = ref('Digital Artist')
 const projects = ref(8)
@@ -20,19 +22,27 @@ const visibilityOpen = ref(false)
 
 // Retrieve profile information from PostgreSQL
 const loadProfile = async () => {
-    try {
-        const response = await api.get('/profile')
-        const data = response.data
+  try {
+    const response = await api.get('/profile')
+    const data = response.data
 
-        fullName.value = data.display_name || 'First & Last Name'
-        bio.value = data.bio || 'No bio added yet.'
-        creatorType.value = data.creator_type || 'Digital Artist'
+    fullName.value = data.display_name || 'First & Last Name'
+    bio.value = data.bio || 'No bio added yet.'
+    creatorType.value = data.creator_type || 'Digital Artist'
 
-        profileError.value = ''
-    } catch (error) {
-        profileError.value = 'Could not load profile.'
-        console.error(error)
+    // Retrieve the saved profile picture
+    if (data.profile_picture && data.profile_picture !== 'placeholder') {
+      profileImage.value =
+        `${api.defaults.baseURL}/profile/picture/${data.user_id}?t=${Date.now()}`
+    } else {
+      profileImage.value = defaultImage
     }
+
+    profileError.value = ''
+  } catch (error) {
+    profileError.value = 'Could not load profile.'
+    console.error(error)
+  }
 }
 
 // Load saved information when the page opens
@@ -82,7 +92,7 @@ onMounted(() => {
           style="color: var(--bs-secondary); border: none;"
         >
           <i class="far fa-user"></i>
-          @username
+          @{{ authStore.username }}
         </button>
 
         <ul class="dropdown-menu dropdown-menu-end">
@@ -123,8 +133,9 @@ onMounted(() => {
         <div class="col-12 col-lg-7 d-flex align-items-center gap-4 profile-identity">
           <img
             class="profile-photo"
-            src="/assets/img/photo-1779896411959-26149949fdc3.jpg"
-            alt="A stylish man in a blue suit holding a camera"
+            :src="profileImage"
+            alt="Profile picture"
+            @error="profileImage = defaultImage"
           />
           <div>
             <h1 class="profile-name">{{ fullName }}</h1>

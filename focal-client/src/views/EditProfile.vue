@@ -1,56 +1,122 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue'
+import { ref, onMounted,onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/focal-api'
+import { useAuthStore } from '../stores/auth-str'
+
+const authStore = useAuthStore()
 
 const router = useRouter()
 
-// Sample profile data. Replace this with API-loaded profile information later.
-const displayName = ref('First & Last Name')
-const username = ref('username')
-const bio = ref('This is where the user will put their bio')
-const creatorType = ref('Digital Artist')
-const email = ref('creator@example.com')
-const profileImage = ref('/assets/img/photo-1779896411959-26149949fdc3.jpg')
+// User information
+const displayName = ref('')
+const username = ref('')
+const bio = ref('')
+const creatorType = ref('')
+const email = ref('')
+const defaultImage = '/assets/img/photo-1779896411959-26149949fdc3.jpg'
+const profileImage = ref(defaultImage)
 const errorMessage = ref('')
 const savedMessage = ref('')
 let previewUrl: string | null = null
+const selectedPhoto = ref<File | null>(null)
 
 function selectPhoto(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
+
   if (!file) return
-  if (!file.type.startsWith('image/')) {
-    errorMessage.value = 'Choose an image file.'
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+
+  if (!allowedTypes.includes(file.type)) {
+    errorMessage.value = 'Choose a JPG, PNG, or WebP image.'
     return
   }
+
+  if (file.size > 5 * 1024 * 1024) {
+    errorMessage.value = 'Image must be under 5 MB.'
+    return
+  }
+
+  selectedPhoto.value = file
+
   if (previewUrl) URL.revokeObjectURL(previewUrl)
+
   previewUrl = URL.createObjectURL(file)
   profileImage.value = previewUrl
+
   errorMessage.value = ''
   savedMessage.value = ''
 }
 
+// Retrieve the user's saved profile information
+const loadProfile = async () => {
+  try {
+    const response = await api.get('/profile')
+    const data = response.data
+
+    displayName.value = data.display_name || ''
+    username.value = data.username || ''
+    bio.value = data.bio || ''
+    creatorType.value = data.creator_type || ''
+    email.value = data.email || ''
+
+    // Retrieve the saved profile picture
+    if (data.profile_picture && data.profile_picture !== 'placeholder') {
+      profileImage.value =
+        `${api.defaults.baseURL}/profile/picture/${data.user_id}?t=${Date.now()}`
+    } else {
+      profileImage.value = defaultImage
+    }
+
+  } catch (error) {
+    errorMessage.value = 'Could not load profile.'
+    console.error(error)
+  }
+}
 
 const saveProfile = async () => {
   savedMessage.value = ''
   errorMessage.value = ''
 
   try {
-    await api.put('/profile', {
-    displayName: displayName.value,
-    username: username.value,
-    bio: bio.value,
-    creatorType: creatorType.value
-  })
+    const response = await api.put('/profile', {
+      displayName: displayName.value,
+      username: username.value,
+      bio: bio.value,
+      creatorType: creatorType.value
+    })
+
+    // Update the username in the authentication store
+    authStore.updateUsername(response.data.user.username)
+
+    // Upload the profile picture if a new one was selected
+    if (selectedPhoto.value) {
+      const formData = new FormData()
+
+      formData.append('image', selectedPhoto.value)
+
+      await api.post('/profile/picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      selectedPhoto.value = null
+    }
 
     savedMessage.value = 'Profile saved successfully!'
+
   } catch (error) {
-    errorMessage.value = 'Could not save profile.'
+    errorMessage.value = 'Could not save all profile changes.'
     console.error(error)
   }
 }
 
+onMounted(() => {
+  loadProfile()
+})
 
 onUnmounted(() => {
   if (previewUrl) URL.revokeObjectURL(previewUrl)
@@ -77,16 +143,15 @@ onUnmounted(() => {
       <RouterLink :to="{ name: 'CreatorProfile' }" class="text-decoration-none nav-link-text">Profile</RouterLink>
 
       <div class="dropdown">
-        <button class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2 nav-link-text"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2 nav-link-text" type="button" data-bs-toggle="dropdown" aria-expanded="false">
           <i class="far fa-user" aria-hidden="true"></i>
-          @username
+          @{{ authStore.username }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><RouterLink class="dropdown-item" :to="{ name: 'EditProfile' }">Edit Profile</RouterLink></li>
           <li><RouterLink class="dropdown-item" :to="{ name: 'BoardManagement' }">Saved Boards</RouterLink></li>
           <li><hr class="dropdown-divider" /></li>
-          <li><button class="dropdown-item" type="button">Log Out</button></li>
+          <li><button class="dropdown-item" type="button" @click="authStore.logout()">Log Out</button></li>
         </ul>
       </div>
     </nav>
@@ -107,10 +172,21 @@ onUnmounted(() => {
           <section class="form-section mb-4">
             <h2 class="section-title">Profile Picture</h2>
             <div class="d-flex align-items-center flex-wrap gap-4">
-              <img :src="profileImage" class="profile-preview" alt="Profile picture preview" />
+              <img
+                :src="profileImage"
+                class="profile-preview"
+                alt="Profile picture preview"
+                @error="profileImage = defaultImage"
+              />
               <div>
                 <label for="profile-photo" class="btn choose-photo">Choose Photo</label>
-                <input id="profile-photo" class="visually-hidden" type="file" accept="image/*" @change="selectPhoto" />
+                <input
+                  id="profile-photo"
+                  class="visually-hidden"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  @change="selectPhoto"
+                />
               </div>
             </div>
           </section>
@@ -154,7 +230,7 @@ onUnmounted(() => {
           <section class="form-section mb-4">
             <h2 class="section-title">Account Information</h2>
             <label class="form-label" for="email">Email Address</label>
-            <input id="email" v-model="email" class="form-control" type="email" autocomplete="email" required />
+            <input id="email" v-model="email" class="form-control" type="email" autocomplete="email" readonly />
           </section>
 
           <p v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</p>

@@ -1,5 +1,8 @@
 <script setup>
 import { computed, ref, nextTick } from 'vue'
+import { useAuthStore } from '../stores/auth-str'
+
+const authStore = useAuthStore()
 
 // color palette
 const PALETTE = [
@@ -192,7 +195,7 @@ function handleStatusToggle(id) {
           style="color: var(--bs-secondary); border: none;"
         >
           <i class="far fa-user"></i>
-          @username
+          @{{ authStore.username }}
         </button>
 
         <ul class="dropdown-menu dropdown-menu-end">
@@ -219,7 +222,7 @@ function handleStatusToggle(id) {
           </li>
 
           <li>
-            <button class="dropdown-item" type="button">
+            <button class="dropdown-item" type="button" @click="authStore.logout()">
               Log Out
             </button>
           </li>

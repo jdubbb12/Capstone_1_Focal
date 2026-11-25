@@ -23,6 +23,8 @@ export const useAuthStore = defineStore("auth", () => {
     const user = ref<User | null>(JSON.parse(localStorage.getItem("focal-user") || "null"));
 
     const isAuthenticated = computed(() => !!token.value);
+    // Grabs the username
+    const username = computed(() => user.value?.username || 'username');
 
     async function login(credentials: { email: string; password: string }) {
         try {
@@ -42,6 +44,15 @@ export const useAuthStore = defineStore("auth", () => {
         }
     }
 
+    // Updates the username when it is updated
+    function updateUsername(newUsername: string) {
+    if (user.value) {
+        user.value.username = newUsername;
+
+        localStorage.setItem("focal-user", JSON.stringify(user.value));
+    }
+}
+
     function logout() {
         token.value = null;
         user.value = null;
@@ -50,5 +61,5 @@ export const useAuthStore = defineStore("auth", () => {
         router.push("/login");
         // delete api.defaults.headers.commmon["Authorization"]
     }
-    return { token, user, isAuthenticated, login, logout };
+    return { token, user, isAuthenticated, username, login, logout, updateUsername };
 });

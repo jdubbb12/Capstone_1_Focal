@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// This component preserves the Bootstrap Studio board management design.
-// Stylesheets are loaded by the application's index.html.
+import { useAuthStore } from '../stores/auth-str'
+
+const authStore = useAuthStore()
 </script>
 
 <template>
@@ -56,7 +57,7 @@
           style="color: var(--bs-secondary); border: none;"
         >
           <i class="far fa-user"></i>
-          @username
+          @{{ authStore.username }}
         </button>
 
         <ul class="dropdown-menu dropdown-menu-end">
@@ -83,7 +84,7 @@
           </li>
 
           <li>
-            <button class="dropdown-item" type="button">
+            <button class="dropdown-item" type="button" @click="authStore.logout()">
               Log Out
             </button>
           </li>
