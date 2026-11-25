@@ -7,17 +7,29 @@ for the file and properly sending it to the client.
 
 */
 
-// FOR NOW, WE ARE ASSUMING THE USER HAS PROPER ACCESS, THESE ALL NEED A PROPER WEB TOKEN TO ACCESS IN ThE FUTURE
-// You can test API calls through using a REST client... Why did I never think about that?
 import { Router } from 'express';
 import { unlink } from "node:fs/promises";
 import path from "node:path";
 import type { Request, Response } from 'express';
 import { database } from './auth.js';
 import upload from "../middleware/storage-mw.js"
+import { optionalAuthToken, authToken, type AuthRequest } from '../middleware/auth-mw.js';
+
 
 const router = Router();
 const DUPLICATE_ITEM_VIOLATION = '23505'
+
+// As to ensure when deleting a file for errors, etc, it's done properly-ish instead
+// of hoping the server actually does unlink the file form the FS.
+const saferUnlink = async (targetPath: string | undefined) => {
+    if (!targetPath) return;
+    try {
+        await unlink(targetPath);
+    }
+    catch (err: any) {
+        console.log(err);
+    }
+}
 
 // In order for ANY of the file uploads (POST) to work at all, the Vue file **must** have a form
 // with the following tags:
@@ -27,16 +39,19 @@ const DUPLICATE_ITEM_VIOLATION = '23505'
 // Otherwise, the data is invalid and wont upload properly and cause exceptions.
 
 // Upload new art 
-// TODO: proper upload verification and other limits / checks that wont cause further issues later.
-router.post("/artworks", upload.single("image"), async (req: Request, res: Response) => {
+router.post("/artworks", authToken, upload.single("image"), async (req: AuthRequest, res: Response) => {
     if (req.file === undefined) {
         return res.status(400).json({ error: "An invalid file was sent and could not be processed." })
     }
-    const userID = req.body.userID; // BAD! BAD! BAD! no actual checking if authenticated !!!!!!!!! BAD!
+    const userID = req.user?.userID
+    if (!userID) {
+        await saferUnlink(req.file?.path);
+        return res.status(401).json({ error: 'Authentication required.' });
+    }
     const title = req.body.title;
     const desc = req.body.desc;
     const imgPath = path.relative(process.cwd(), `${req.file.destination}/${req.file.filename}`).replace(/\\/g, "/");; // bit dirty, but if I don't do this, the paths wont work on Linux/MacOS
-    const visibility = true; // :( this is bad, but for now it'll be alright. i guess....
+    const visibility = true; // nevermind, this is the default now. it's my party and i'll cry if i want to.
 
     console.log(`[SERVER]\tClient uploaded file ${req.file.filename}`);
     const client = await database.connect();
@@ -68,7 +83,7 @@ router.post("/artworks", upload.single("image"), async (req: Request, res: Respo
     }
     catch (err: any) {
         await client.query("ROLLBACK"); // Something has gone *really* wrong, we need to roll back to the previous state.
-        await unlink(imgPath);
+        await saferUnlink(imgPath);
         console.log("[ERROR]\tUpload failed. Deleted image.")
         // DUPLICATE_ITEM_VIOLATION refers to a PostgreSQL error code when an item is a duplicate, this piece of work already exists... somehow. if you reach here, you need a medal.
         // The only way I could "maybe" see this happen is if the server somehow manages to process everything at once, needs further testing...
@@ -84,7 +99,7 @@ router.post("/artworks", upload.single("image"), async (req: Request, res: Respo
 });
 
 // Get a user's specfic artworks
-router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, res: Response) => {
+router.get("/users/:userID/artworks", optionalAuthToken, async (req: AuthRequest, res: Response) => {
     const userIDNum = Number(req.params.userID); // convert the string ID into an actual number you can use
 
     // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
@@ -92,12 +107,18 @@ router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, r
         return res.status(400).json({ error: "An invalid user ID was provided." });
     }
 
+    const requestUID = req.user?.userID;
+    const isOwner = requestUID !== undefined && requestUID === userIDNum;
 
     // const client = await database.connect();
     try {
-        const result = await database.query(
-            `SELECT * FROM artwork WHERE user_id = $1
-            `, [userIDNum]);
+        const result = isOwner
+            ? await database.query(`SELECT * FROM artwork WHERE user_id = $1 ORDER BY artwork_id DESC`,
+                [userIDNum]
+            )
+            : await database.query(`SELECT * FROM artwork WHERE user_id = $1 AND is_visible = true ORDER BY artwork_id DESC`,
+                [userIDNum]
+            )
         res.status(200).json({
             message: "Retrived the user's artwork.",
             artwork: result.rows
@@ -112,7 +133,7 @@ router.get("/users/:userID/artworks", async (req: Request<{ userID: string }>, r
 });
 
 // Get a specific piece of art
-router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }>, res: Response) => {
+router.get("/artworks/:artworkID/img", optionalAuthToken, async (req: AuthRequest, res: Response) => {
     const artworkIDNum = Number(req.params.artworkID);
 
     // if the API somehow recieved an invalid call or etc.
@@ -122,7 +143,7 @@ router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }
 
     try {
         const result = await database.query(`
-        SELECT artwork_link FROM artwork WHERE artwork_id = $1`,
+        SELECT user_id, artwork_link, is_visible FROM artwork WHERE artwork_id = $1`,
             [artworkIDNum]);
 
         if (result.rows.length === 0) { // The length being 0 means nothing was found, so we return 404.
@@ -130,7 +151,17 @@ router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }
                 error: "The given artwork ID could not be found."
             });
         }
-        const imagePath = path.resolve(process.cwd(), result.rows[0].artwork_link); // Essentially, we are creating the aboslute path for the server to get the image.
+        const art = result.rows[0];
+        const requesterID = req.user?.userID;
+        const isOwner = requesterID !== undefined && requesterID === art.user_id;
+        // console.log(requesterID, art.user_id)
+
+        if (!art.is_visible && !isOwner) {
+            return res.status(requesterID === undefined ? 401 : 403).json({
+                error: requesterID === undefined ? 'Authentication required.' : 'This artwork is private.',
+            });
+        }
+        const imagePath = path.resolve(process.cwd(), art.artwork_link); // Essentially, we are creating the aboslute path for the server to get the image.
         res.sendFile(imagePath);
     }
     catch (err: any) {
@@ -142,7 +173,7 @@ router.get("/artworks/:artworkID/img", async (req: Request<{ artworkID: string }
 });
 
 // Get speciifc information about an artwork
-router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, res: Response) => {
+router.get("/artworks/:artworkID", optionalAuthToken, async (req: AuthRequest, res: Response) => {
     const artworkIDNum = Number(req.params.artworkID); // convert the string ID into an actual number you can use
 
     // if the API somehow recieved an invalid call or etc.
@@ -156,10 +187,23 @@ router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, r
         const result = await database.query(
             `SELECT * FROM artwork WHERE artwork_id = $1
             `, [artworkIDNum]);
-        res.status(200).json({
-            message: "Retrived artwork.",
-            artwork: result.rows[0]
-        })
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'The given artwork ID could not be found.' });
+        }
+        const art = result.rows[0];
+        const requesterID = req.user?.userID;
+        const isOwner = requesterID !== undefined && requesterID === art.user_id;
+
+        if (!art.is_visible && !isOwner) {
+            return res.status(requesterID === undefined ? 401 : 403).json({
+                error: requesterID === undefined ? 'Authentication required.' : 'This artwork is private.',
+            });
+        }
+
+        return res.status(200).json({
+            message: 'Retrieved artwork.',
+            artwork: art,
+        });
     }
     catch (err: any) {
         res.status(500).json({
@@ -171,7 +215,13 @@ router.get("/artworks/:artworkID", async (req: Request<{ artworkID: string }>, r
 });
 
 // Uploads a revision of a previously uploaded artwork
-router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Request<{ artworkID: string }>, res: Response) => {
+router.post("/artworks/:artworkID/rev", upload.single("image"), authToken, async (req: AuthRequest, res: Response) => {
+    const userID = req.user?.userID;
+    if (!userID) {
+        await saferUnlink(req.file?.path);
+        return res.status(401).json({ error: 'Authentication required.' });
+    }
+
     if (req.file === undefined) {
         return res.status(400).json({ error: "An invalid file was sent and could not be processed." })
     }
@@ -201,6 +251,10 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
             // return res.status(404).json({ error: "Artwork not found." });
             throw new Error("Artwork not found.")
         }
+        if (artwork.rows[0].user_id !== userID) {
+            throw new Error("Permission denied.")
+        }
+
         const prevArtworkLink = artwork.rows[0].artwork_link;
 
         // Next, we check if we already have previous revisions, if we don't have any, we can assume that the link is the first revision.
@@ -255,7 +309,7 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
     }
     catch (err: any) {
         await client?.query("ROLLBACK");
-        await unlink(currentImage);
+        await saferUnlink(currentImage);
         if (err instanceof Error && err.message === "Artwork not found.") {
             res.status(404).json({
                 error: "Artwork could not be found."
@@ -272,7 +326,7 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), async (req: Requ
 });
 
 // Gets a list of revisions of an artwork
-router.get("/artworks/:artworkID/rev", async (req: Request<{ artworkID: string }>, res: Response) => {
+router.get("/artworks/:artworkID/rev", optionalAuthToken, async (req: AuthRequest, res: Response) => {
     const artworkID = Number(req.params.artworkID); // convert the string ID into an actual number you can use
 
     // if the API somehow recieved the call /users/InvalidID/artworks or /users/-1/artworks.
@@ -281,10 +335,30 @@ router.get("/artworks/:artworkID/rev", async (req: Request<{ artworkID: string }
     }
     // const client = await database.connect();
     try {
+        const parentRes = await database.query(
+            `SELECT user_id, is_visible 
+             FROM artwork WHERE artwork_id = $1
+            `, [artworkID]
+        );
+
+        if (parentRes.rows.length === 0) {
+            return res.status(404).json({ error: 'Artwork not found.' });
+        }
+
+        const parent = parentRes.rows[0];
+        const userID = req.user?.userID;
+        const isOwner = userID !== undefined && userID === parent.user_id;
+
+        if (!parent.is_visible && !isOwner) {
+            return res.status(userID === undefined ? 401 : 403).json({
+                error: userID === undefined ? 'Authentication required.' : 'This artwork is private.',
+            });
+        }
         const result = await database.query(
-            `SELECT * FROM artwork_revision 
-             WHERE artwork_id = $1
-            `, [artworkID]);
+            `SELECT * FROM artwork_revision WHERE artwork_id = $1 ORDER BY revision_id ASC`,
+            [artworkID]
+        );
+
         res.status(200).json({
             message: "Retrived the user's artwork.",
             artwork: result.rows
@@ -297,5 +371,47 @@ router.get("/artworks/:artworkID/rev", async (req: Request<{ artworkID: string }
         console.log(err);
     }
 });
+
+// Allows users to change visibility of artworks
+router.patch("/artworks/:artworkID/visi", authToken, async (req: AuthRequest, res: Response) => {
+    const userID = req.user?.userID;
+    if (!userID) {
+        return res.status(401).json({ error: "Authentication required." });
+    }
+
+    const artworkID = Number(req.params.artworkID);
+    if (!Number.isInteger(artworkID) || artworkID <= 0) {
+        return res.status(400).json({ error: "An invalid artwork ID was provided." });
+    }
+
+    try {
+        const result = await database.query(`
+            UPDATE artwork
+            SET is_visible = $1
+            WHERE artwork_id = $2 AND user_id = $3
+            RETURNING artwork_id, user_id, artwork_title, is_visible`,
+            [req.body.is_visible, artworkID, userID]);
+
+        if (result.rows.length === 0) {
+            const permCheck = await database.query(`
+                SELECT 1 FROM artwork WHERE artwork_id = $1`,
+                [artworkID]);
+
+            if (permCheck.rows.length === 0) {
+                return res.status(404).json({ error: "Artwork not found." });
+            }
+            return res.status(403).json({ error: "Permission denied for modification." })
+        }
+
+        return res.status(200).json({
+            message: "Artwork visiblity updated.",
+            artwork: result.rows[0]
+        })
+    }
+    catch (err: any) {
+        console.log(err);
+        return res.status(500).json({ error: "An internal server error has occured." })
+    }
+})
 
 export default router;

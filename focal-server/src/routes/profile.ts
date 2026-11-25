@@ -1,4 +1,4 @@
-
+// TODO: implement auth-mw, as this is a bit of a mess
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';

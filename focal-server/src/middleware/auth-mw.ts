@@ -41,3 +41,24 @@ export const authToken = (req: AuthRequest, res: Response, next: NextFunction) =
         return res.status(403).json({ error: "Invalid or expired token." })
     }
 }
+
+// The only difference here, is that the function moves on regardless of the given token.
+export const optionalAuthToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith("Bearer") // If it starts with Bearer, we then split the string for the token, if for some reason that's false is undefined and we return 401.
+        ? authHeader.split(" ")[1]
+        : undefined;
+    if (!token) {
+        return res.status(401).json({ error: "Invalid token provided." })
+    }
+
+    try {
+        const decodedToken = jsonWT.verify(token, JWT_SECRET) as { userID: number };
+        req.user = decodedToken;
+    }
+    catch (err: any) {
+        console.log(err);
+        return res.status(403).json({ error: "Invalid or expired token." })
+    }
+    next();
+}
