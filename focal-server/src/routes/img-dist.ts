@@ -10,10 +10,11 @@ for the file and properly sending it to the client.
 import { Router } from 'express';
 import { unlink } from "node:fs/promises";
 import path from "node:path";
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { database } from './auth.js';
 import upload from "../middleware/storage-mw.js"
 import { optionalAuthToken, authToken, type AuthRequest } from '../middleware/auth-mw.js';
+import { fileValidation } from '../middleware/file-validation.js';
 
 
 const router = Router();
@@ -39,7 +40,7 @@ const saferUnlink = async (targetPath: string | undefined) => {
 // Otherwise, the data is invalid and wont upload properly and cause exceptions.
 
 // Upload new art 
-router.post("/artworks", authToken, upload.single("image"), async (req: AuthRequest, res: Response) => {
+router.post("/artworks", authToken, upload.single("image"), fileValidation, async (req: AuthRequest, res: Response) => {
     if (req.file === undefined) {
         return res.status(400).json({ error: "An invalid file was sent and could not be processed." })
     }
@@ -215,7 +216,7 @@ router.get("/artworks/:artworkID", optionalAuthToken, async (req: AuthRequest, r
 });
 
 // Uploads a revision of a previously uploaded artwork
-router.post("/artworks/:artworkID/rev", upload.single("image"), authToken, async (req: AuthRequest, res: Response) => {
+router.post("/artworks/:artworkID/rev", authToken, upload.single("image"), fileValidation, async (req: AuthRequest, res: Response) => {
     const userID = req.user?.userID;
     if (!userID) {
         await saferUnlink(req.file?.path);
@@ -240,7 +241,7 @@ router.post("/artworks/:artworkID/rev", upload.single("image"), authToken, async
 
         // First, we get the current image we are replacing and its link.
         const artwork = await client.query(`
-            SELECT artwork_link
+            SELECT artwork_link, artwork_id, user_id
             FROM artwork
             WHERE artwork_id = $1
             FOR UPDATE`,
