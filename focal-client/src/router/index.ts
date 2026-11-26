@@ -5,6 +5,8 @@ import BoardManagement from '../views/BoardManagement.vue'
 import TwoDView from '../views/TwoDView.vue'
 import Signup from '../views/Signup.vue'
 import EditProfile from '../views/EditProfile.vue'
+import Upload from '../views/Upload.vue'
+
 
 const router = createRouter({
   history: createWebHistory(),
@@ -38,6 +40,12 @@ const router = createRouter({
       path: '/edit-profile',
       name: 'EditProfile',
       component: EditProfile
+      
+    },
+    {
+      path: '/upload',
+      name: 'Upload',
+      component: Upload
     }
   ]
 })

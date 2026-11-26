@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import MainLayout from '../layouts/MainLayout.vue'
 
 const router = useRouter()
 
@@ -47,39 +48,8 @@ onUnmounted(() => {
 </script>
 
 <template>
+<MainLayout>
   <main class="edit-profile-page">
-    <!-- Focal navbar -->
-    <nav class="focal-nav d-flex flex-row justify-content-start align-items-center gap-3 px-4">
-      <RouterLink :to="{ name: 'InspirationFeed' }" aria-label="FOCAL Home">
-        <img src="/assets/img/Focal%20Logo.png" width="96" height="72" alt="FOCAL logo" />
-      </RouterLink>
-
-      <div class="input-group rounded-pill flex-grow-1 search-group">
-        <input class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search" />
-        <button class="btn rounded-circle search-button" type="button" aria-label="Search">
-          <i class="fas fa-search" aria-hidden="true"></i>
-        </button>
-      </div>
-
-      <button class="btn upload-button" type="button">Upload</button>
-      <RouterLink :to="{ name: 'InspirationFeed' }" class="text-decoration-none nav-link-text">Feed</RouterLink>
-      <RouterLink :to="{ name: 'CreatorProfile' }" class="text-decoration-none nav-link-text">Profile</RouterLink>
-
-      <div class="dropdown">
-        <button class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2 nav-link-text"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="far fa-user" aria-hidden="true"></i>
-          @username
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><RouterLink class="dropdown-item" :to="{ name: 'EditProfile' }">Edit Profile</RouterLink></li>
-          <li><RouterLink class="dropdown-item" :to="{ name: 'BoardManagement' }">Saved Boards</RouterLink></li>
-          <li><hr class="dropdown-divider" /></li>
-          <li><button class="dropdown-item" type="button">Log Out</button></li>
-        </ul>
-      </div>
-    </nav>
-
     <!-- Edit form -->
     <div class="container py-4 py-lg-5">
       <div class="edit-panel mx-auto">
@@ -157,6 +127,7 @@ onUnmounted(() => {
       </div>
     </div>
   </main>
+</MainLayout>
 </template>
 
 <style scoped>
