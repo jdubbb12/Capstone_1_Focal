@@ -104,4 +104,13 @@ VALUES
         'placeholder', '2.0'),
     (2, NULL, 'placeholder', '1.0');
 
+-- 13. Artwork Favorites
+INSERT INTO favorites
+    (user_id, artwork_id)
+VALUES
+    (1, 1),
+    (1, 2),
+    (2, 3),
+    (3, 1);
+
 COMMIT;
