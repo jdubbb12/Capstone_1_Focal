@@ -17,6 +17,9 @@ create table user_interests (user_id integer NOT NULL, interest_id integer NOT N
 -- columns artwork_id, user_id, title, creation_date, artwork_link, is_visible
 create table artwork (artwork_id integer primary key generated always as identity, user_id integer NOT NULL, artwork_title varchar(75), artwork_description varchar(500), artwork_link text NOT NULL, creation_date date NOT NULL, is_visible bool, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade);
 
+-- columns user_id, artwork_id
+create table favorites ( user_id integer NOT NULL, artwork_id integer NOT NULL, constraint fk_user_id foreign key (user_id) references user_login(user_id) on delete cascade, constraint fk_artwork_id foreign key (artwork_id) references artwork(artwork_id) on delete cascade);
+
 -- columns artwork_id, interest_id
 create table artwork_interests (artwork_id integer NOT NULL, interest_id integer NOT NULL, constraint fk_artwork_id foreign key (artwork_id) references artwork(artwork_id) on delete cascade, constraint fk_interest_id foreign key (interest_id) references interests(interest_id) on delete cascade);
 
