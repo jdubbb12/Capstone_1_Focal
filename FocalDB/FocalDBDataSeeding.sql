@@ -104,4 +104,13 @@ VALUES
         'https://example.com/artwork/1/v2', '2.0'),
     (2, NULL, 'https://example.com/artwork/2/v1', '1.0');
 
+-- 13. Artwork Favorites
+INSERT INTO favorites
+    (user_id, artwork_id)
+VALUES
+    (1, 1),
+    (1, 2),
+    (2, 3),
+    (3, 1);
+
 COMMIT;
