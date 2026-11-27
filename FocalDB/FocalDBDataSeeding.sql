@@ -10,11 +10,11 @@ VALUES
     ('carla@example.com', '2026-10-19', 'carla_creates');
 
 -- 2. USER PROFILES
-INSERT INTO user_profile (user_id, profile_picture, is_visible)
+INSERT INTO user_profile (user_id, profile_picture, is_visible, display_name, bio, creator_type)
 VALUES
-    (1, 'placeholder', TRUE),
-    (2, 'placeholder', TRUE),
-    (3, 'placeholder', TRUE);
+    (1, 'placeholder', TRUE, 'Chattykathy123', 'Chatty cat lady', 'Artist'),
+    (2, 'placeholder', TRUE, 'Bobwhobuildsstuff', 'Not the animated guy', 'Builder'),
+    (3, 'placeholder', TRUE, 'GlazeGuy', 'Fella with a love for ceramics', 'Potter');
 
 -- 3. PASSWORD HASH PLACEHOLDERS
 INSERT INTO user_pass_hash (user_id, user_hash)
