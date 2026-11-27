@@ -1,106 +1,102 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import api from '../services/focal-api'
+import MainLayout from '../layouts/MainLayout.vue'
 
 // Sample creator information from the Bootstrap Studio design.
 const fullName = ref('First & Last Name')
+const defaultImage = '/assets/img/photo-1779896411959-26149949fdc3.jpg'
+const profileImage = ref(defaultImage)
 const bio = ref('This is where the user will put their bio')
 const creatorType = ref('Digital Artist')
-const projects = ref(8)
-const favorites = ref(24)
-const collections = ref(3)
+const projects = computed(() => uploadedArtwork.value.length)
+const favorites = ref(0)
+const profileError = ref('')
 // const search = ref('')
 const visibility = ref('Visibility')
 const visibilityOpen = ref(false)
+
+interface Artwork {
+  artwork_id: number
+  artwork_title: string
+  artwork_link: string
+  artwork_description: string
+  user_id: number
+}
+
+const uploadedArtwork = ref<Artwork[]>([])
+const artworkError = ref('')
+
+// Retrieve profile information from PostgreSQL
+const loadProfile = async () => {
+  try {
+    const response = await api.get('/profile')
+    const data = response.data
+
+    fullName.value = data.display_name || 'First & Last Name'
+    bio.value = data.bio || 'No bio added yet.'
+    creatorType.value = data.creator_type || 'Digital Artist'
+
+    // Retrieve the saved profile picture
+    if (data.profile_picture && data.profile_picture !== 'placeholder') {
+      profileImage.value =
+        `${api.defaults.baseURL}/profile/picture/${data.user_id}?t=${Date.now()}`
+    } else {
+      profileImage.value = defaultImage
+    }
+
+    profileError.value = ''
+  } catch (error) {
+    profileError.value = 'Could not load profile.'
+    console.error(error)
+  }
+}
+
+
+const loadArtwork = async () => {
+  try {
+    const profileResponse = await api.get('/profile')
+    const userId = profileResponse.data.user_id
+
+    const response = await api.get(
+      `/dist/users/${userId}/artworks`
+    )
+
+    uploadedArtwork.value = response.data.artwork
+    artworkError.value = ''
+
+  } catch (error) {
+    artworkError.value = 'Could not load artwork.'
+    console.error(error)
+  }
+}
+
+
+// Load saved information when the page opens
+onMounted(() => {
+  loadProfile()
+  loadArtwork()
+})
+
 </script>
 
 <template>
+<MainLayout>
   <main class="creator-profile">
-    <!-- Navigation bar -->
-    <div class="d-flex flex-row justify-content-start align-items-center gap-3 px-4" style="background: #F5F3EB;">
-      <RouterLink to="/feed" aria-label="FOCAL Home">
-        <img height="72" src="/assets/img/Focal%20Logo.png" width="96" />
-      </RouterLink>
-
-      <div class="input-group rounded-pill flex-grow-1" style="border-width: 0px; border-color: var(--bs-secondary);">
-        <input
-          class="rounded-pill form-control"
-          placeholder="Search..."
-          style="border-width: 4px; border-color: #a6b793; max-width: 700px;"
-          type="text"
-        />
-        <button class="btn btn-primary rounded-circle" style="background: #a6b793; border-width: 0px;" type="button">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-
-      <button class="btn btn-primary" style="background: #465344; border-width: 0px;" type="button">
-        Upload
-      </button>
-
-      <RouterLink :to="{ name: 'InspirationFeed' }" class="text-decoration-none" style="color: var(--bs-secondary);">
-        Feed
-      </RouterLink>
-      <RouterLink :to="{ name: 'CreatorProfile' }" class="text-decoration-none" style="color: var(--bs-secondary);">
-        Profile
-      </RouterLink>
-
-      <div class="dropdown">
-        <button
-          class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-          style="color: var(--bs-secondary); border: none;"
-        >
-          <i class="far fa-user"></i>
-          @username
-        </button>
-
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li>
-            <RouterLink
-              class="dropdown-item"
-              :to="{ name: 'EditProfile' }"
-            >
-              Edit Profile
-            </RouterLink>
-          </li>
-
-          <li>
-            <RouterLink
-              class="dropdown-item"
-              :to="{ name: 'BoardManagement' }"
-            >
-              Saved Boards
-            </RouterLink>
-          </li>
-
-          <li>
-            <hr class="dropdown-divider" />
-          </li>
-
-          <li>
-            <button class="dropdown-item" type="button">
-              Log Out
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-
     <!-- Creator information and statistics -->
     <section class="profile-header px-4 py-4">
       <div class="row align-items-center gy-4">
         <div class="col-12 col-lg-7 d-flex align-items-center gap-4 profile-identity">
           <img
             class="profile-photo"
-            src="/assets/img/photo-1779896411959-26149949fdc3.jpg"
-            alt="A stylish man in a blue suit holding a camera"
+            :src="profileImage"
+            alt="Profile picture"
+            @error="profileImage = defaultImage"
           />
           <div>
             <h1 class="profile-name">{{ fullName }}</h1>
             <p class="profile-bio">{{ bio }}</p>
-            <span class="badge creator-badge">{{ creatorType }}</span>
+            <span class="badge creator-badge d-block text-start">{{ creatorType }}</span>
           </div>
         </div>
 
@@ -113,10 +109,6 @@ const visibilityOpen = ref(false)
             <div class="stat">
               <strong>{{ favorites }}</strong>
               <span>Favorites</span>
-            </div>
-            <div class="stat">
-              <strong>{{ collections }}</strong>
-              <span>Collections</span>
             </div>
           </div>
         </div>
@@ -149,189 +141,77 @@ const visibilityOpen = ref(false)
           </ul>
         </div>
       </div>
-
+      
+      <!-- User's uploaded artwork -->
       <div class="row gx-3 gy-4 row-cols-1 row-cols-md-2 row-cols-lg-4">
-        <!-- Card 1 -->
-        <div class="col">
+        <div
+          v-for="artwork in uploadedArtwork"
+          :key="artwork.artwork_id"
+          class="col"
+        >
           <article class="card h-100 portfolio-card">
             <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
+
+              <!-- Clickable artwork image -->
+              <RouterLink
+                :to="{ name: 'TwoDView' }"
+                class="text-decoration-none d-block"
+              >
                 <img
-                  src="/assets/img/photo-1791234537439-b280ab80c590.jpg"
-                  alt="Aerial view of turquoise ocean waves crashing onto a sandy beach"
+                  :src="`${api.defaults.baseURL}/dist/artworks/${artwork.artwork_id}/img`"
+                  :alt="artwork.artwork_title || 'Uploaded artwork'"
                   class="portfolio-image"
                 />
               </RouterLink>
+
+              <!-- Artwork title and options -->
               <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
+                <span>{{ artwork.artwork_title }}</span>
+
+                <div class="dropdown">
+                  <button
+                    class="btn p-0 border-0 text-white"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="Artwork options"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <RouterLink
+                        class="dropdown-item"
+                        :to="{ name: 'TwoDView' }"
+                      >
+                        View Artwork
+                      </RouterLink>
+                    </li>
+                  </ul>
+                </div>
               </div>
+
+              <!-- Artwork tag -->
               <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">Painting</span>
+                <span class="badge portfolio-tag">
+                  Artwork
+                </span>
               </div>
+
             </div>
           </article>
         </div>
-
-        <!-- Card 2 -->
-        <div class="col">
-          <article class="card h-100 portfolio-card">
-            <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
-                <img
-                  src="/assets/img/photo-1789758490778-78e757c7f28f.jpg"
-                  alt="Aerial view of the Brisbane River, Victoria Bridge, and South Bank at dusk"
-                  class="portfolio-image"
-                />
-              </RouterLink>
-              <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-              </div>
-              <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">Crafts</span>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="col">
-          <article class="card h-100 portfolio-card">
-            <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
-                <img
-                  src="/assets/img/photo-1790564689348-c7c9909f4fd5.jpg"
-                  alt="An aerial view of many colorful kayaks arranged in a star pattern on water"
-                  class="portfolio-image"
-                />
-              </RouterLink>
-              <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-              </div>
-              <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">Video</span>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="col">
-          <article class="card h-100 portfolio-card">
-            <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
-                <img
-                  src="/assets/img/photo-1791350879692-0f88043725b7.jpg"
-                  alt="Iridescent soap film ribbons with blue and gold highlights on a grey background"
-                  class="portfolio-image"
-                />
-              </RouterLink>
-              <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-              </div>
-              <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">3D Animation</span>
-                <span class="badge portfolio-tag">Video</span>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Card 5 -->
-        <div class="col">
-          <article class="card h-100 portfolio-card">
-            <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
-                <img
-                  src="/assets/img/photo-1791015759553-227f22b16087.jpg"
-                  alt="A light grey vintage Volkswagen Beetle parked on a street in front of a building"
-                  class="portfolio-image"
-                />
-              </RouterLink>
-              <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-              </div>
-              <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">Video</span>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Card 6 -->
-        <div class="col">
-          <article class="card h-100 portfolio-card">
-            <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
-                <img
-                  src="/assets/img/photo-1791121902526-37047a1b93f4.jpg"
-                  alt="A red fox with dark ears and paws on a grey gravel surface"
-                  class="portfolio-image"
-                />
-              </RouterLink>
-              <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-              </div>
-              <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">Crafts</span>
-                <span class="badge portfolio-tag">Video</span>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Card 7 -->
-        <div class="col">
-          <article class="card h-100 portfolio-card">
-            <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
-                <img
-                  src="/assets/img/photo-1778587614817-03d4bc181935.jpg"
-                  alt="Two people view a large, ornate painting in a museum"
-                  class="portfolio-image"
-                />
-              </RouterLink>
-              <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-              </div>
-              <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">Painting</span>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <!-- Card 8 -->
-        <div class="col">
-          <article class="card h-100 portfolio-card">
-            <div class="card-body portfolio-card-body">
-              <RouterLink :to="{ name: 'TwoDView' }" class="text-decoration-none d-block">
-                <img
-                  src="/assets/img/photo-1791231979059-f2a36c2a2e5d.jpg"
-                  alt="Three people walking past a bronze sculpture against a large concrete wall"
-                  class="portfolio-image"
-                />
-              </RouterLink>
-              <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
-                <span>Title</span>
-                <i class="fas fa-ellipsis-v" aria-hidden="true"></i>
-              </div>
-              <div class="card-tags d-flex justify-content-start">
-                <span class="badge portfolio-tag">3D Animation</span>
-              </div>
-            </div>
-          </article>
-        </div>
-
       </div>
+
+      <!-- No uploaded artwork -->
+      <p v-if="uploadedArtwork.length === 0" class="text-center mt-4">
+        You haven't uploaded any artwork yet.
+      </p>
+
     </section>
   </main>
+</MainLayout>
 </template>
 
 <style scoped>
@@ -341,36 +221,10 @@ const visibilityOpen = ref(false)
   background: #a6b793;
 }
 
-.focal-nav {
-  background: #f5f3eb;
-  min-height: 72px;
-}
-
-.nav-search {
-  min-width: 180px;
-  max-width: 760px;
-}
-
-.nav-search input {
-  border: 4px solid #a6b793;
-  max-width: 700px;
-}
-
-.search-button {
-  background: #a6b793;
-  color: #fff;
-  border: 0;
-}
-
-.upload-button,
 .visibility-button {
   background: #465344;
   color: #fff;
   border: 0;
-}
-
-.nav-link-text {
-  color: var(--bs-secondary);
 }
 
 .profile-header {
@@ -406,7 +260,10 @@ const visibilityOpen = ref(false)
 }
 
 .creator-badge {
+  display: table !important;
+  text-align: left;
   padding: 5px 12px;
+  margin-top: 10px;
 }
 
 .stat {

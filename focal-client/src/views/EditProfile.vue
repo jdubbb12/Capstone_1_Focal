@@ -1,45 +1,123 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue'
+import { ref, onMounted,onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../services/focal-api'
+import { useAuthStore } from '../stores/auth-str'
+import MainLayout from '../layouts/MainLayout.vue'
+
+const authStore = useAuthStore()
 
 const router = useRouter()
 
-// Sample profile data. Replace this with API-loaded profile information later.
-const displayName = ref('First & Last Name')
-const username = ref('username')
-const bio = ref('This is where the user will put their bio')
-const creatorType = ref('Digital Artist')
-const email = ref('creator@example.com')
-const profileImage = ref('/assets/img/photo-1779896411959-26149949fdc3.jpg')
+// User information
+const displayName = ref('')
+const username = ref('')
+const bio = ref('')
+const creatorType = ref('')
+const email = ref('')
+const defaultImage = '/assets/img/photo-1779896411959-26149949fdc3.jpg'
+const profileImage = ref(defaultImage)
 const errorMessage = ref('')
 const savedMessage = ref('')
 let previewUrl: string | null = null
+const selectedPhoto = ref<File | null>(null)
 
 function selectPhoto(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
+
   if (!file) return
-  if (!file.type.startsWith('image/')) {
-    errorMessage.value = 'Choose an image file.'
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+
+  if (!allowedTypes.includes(file.type)) {
+    errorMessage.value = 'Choose a JPG, PNG, or WebP image.'
     return
   }
+
+  if (file.size > 5 * 1024 * 1024) {
+    errorMessage.value = 'Image must be under 5 MB.'
+    return
+  }
+
+  selectedPhoto.value = file
+
   if (previewUrl) URL.revokeObjectURL(previewUrl)
+
   previewUrl = URL.createObjectURL(file)
   profileImage.value = previewUrl
+
   errorMessage.value = ''
   savedMessage.value = ''
 }
 
-function saveProfile() {
-  errorMessage.value = ''
-  savedMessage.value = ''
-  if (!displayName.value.trim() || !username.value.trim() || !email.value.trim()) {
-    errorMessage.value = 'Display name, username, and email are required.'
-    return
+// Retrieve the user's saved profile information
+const loadProfile = async () => {
+  try {
+    const response = await api.get('/profile')
+    const data = response.data
+
+    displayName.value = data.display_name || ''
+    username.value = data.username || ''
+    bio.value = data.bio || ''
+    creatorType.value = data.creator_type || ''
+    email.value = data.email || ''
+
+    // Retrieve the saved profile picture
+    if (data.profile_picture && data.profile_picture !== 'placeholder') {
+      profileImage.value =
+        `${api.defaults.baseURL}/profile/picture/${data.user_id}?t=${Date.now()}`
+    } else {
+      profileImage.value = defaultImage
+    }
+
+  } catch (error) {
+    errorMessage.value = 'Could not load profile.'
+    console.error(error)
   }
-  // Frontend prototype only: no backend endpoint or shared profile state yet.
-  savedMessage.value = 'Your changes are ready.'
 }
+
+const saveProfile = async () => {
+  savedMessage.value = ''
+  errorMessage.value = ''
+
+  try {
+    const response = await api.put('/profile', {
+      displayName: displayName.value,
+      username: username.value,
+      bio: bio.value,
+      creatorType: creatorType.value
+    })
+
+    // Update the username in the authentication store
+    authStore.updateUsername(response.data.user.username)
+
+    // Upload the profile picture if a new one was selected
+    if (selectedPhoto.value) {
+      const formData = new FormData()
+
+      formData.append('image', selectedPhoto.value)
+
+      await api.post('/profile/picture', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      selectedPhoto.value = null
+    }
+
+    savedMessage.value = 'Profile saved successfully!'
+
+  } catch (error) {
+    errorMessage.value = 'Could not save all profile changes.'
+    console.error(error)
+  }
+}
+
+onMounted(() => {
+  loadProfile()
+})
 
 onUnmounted(() => {
   if (previewUrl) URL.revokeObjectURL(previewUrl)
@@ -47,39 +125,8 @@ onUnmounted(() => {
 </script>
 
 <template>
+<MainLayout>
   <main class="edit-profile-page">
-    <!-- Focal navbar -->
-    <nav class="focal-nav d-flex flex-row justify-content-start align-items-center gap-3 px-4">
-      <RouterLink :to="{ name: 'InspirationFeed' }" aria-label="FOCAL Home">
-        <img src="/assets/img/Focal%20Logo.png" width="96" height="72" alt="FOCAL logo" />
-      </RouterLink>
-
-      <div class="input-group rounded-pill flex-grow-1 search-group">
-        <input class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search" />
-        <button class="btn rounded-circle search-button" type="button" aria-label="Search">
-          <i class="fas fa-search" aria-hidden="true"></i>
-        </button>
-      </div>
-
-      <button class="btn upload-button" type="button">Upload</button>
-      <RouterLink :to="{ name: 'InspirationFeed' }" class="text-decoration-none nav-link-text">Feed</RouterLink>
-      <RouterLink :to="{ name: 'CreatorProfile' }" class="text-decoration-none nav-link-text">Profile</RouterLink>
-
-      <div class="dropdown">
-        <button class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2 nav-link-text"
-                type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="far fa-user" aria-hidden="true"></i>
-          @username
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><RouterLink class="dropdown-item" :to="{ name: 'EditProfile' }">Edit Profile</RouterLink></li>
-          <li><RouterLink class="dropdown-item" :to="{ name: 'BoardManagement' }">Saved Boards</RouterLink></li>
-          <li><hr class="dropdown-divider" /></li>
-          <li><button class="dropdown-item" type="button">Log Out</button></li>
-        </ul>
-      </div>
-    </nav>
-
     <!-- Edit form -->
     <div class="container py-4 py-lg-5">
       <div class="edit-panel mx-auto">
@@ -96,10 +143,21 @@ onUnmounted(() => {
           <section class="form-section mb-4">
             <h2 class="section-title">Profile Picture</h2>
             <div class="d-flex align-items-center flex-wrap gap-4">
-              <img :src="profileImage" class="profile-preview" alt="Profile picture preview" />
+              <img
+                :src="profileImage"
+                class="profile-preview"
+                alt="Profile picture preview"
+                @error="profileImage = defaultImage"
+              />
               <div>
                 <label for="profile-photo" class="btn choose-photo">Choose Photo</label>
-                <input id="profile-photo" class="visually-hidden" type="file" accept="image/*" @change="selectPhoto" />
+                <input
+                  id="profile-photo"
+                  class="visually-hidden"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  @change="selectPhoto"
+                />
               </div>
             </div>
           </section>
@@ -143,7 +201,7 @@ onUnmounted(() => {
           <section class="form-section mb-4">
             <h2 class="section-title">Account Information</h2>
             <label class="form-label" for="email">Email Address</label>
-            <input id="email" v-model="email" class="form-control" type="email" autocomplete="email" required />
+            <input id="email" v-model="email" class="form-control" type="email" autocomplete="email" readonly />
           </section>
 
           <p v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</p>
@@ -157,6 +215,7 @@ onUnmounted(() => {
       </div>
     </div>
   </main>
+</MainLayout>
 </template>
 
 <style scoped>
@@ -166,19 +225,6 @@ onUnmounted(() => {
   background: #a6b793;
   color: #303830;
 }
-
-.focal-nav {
-  background: #f5f3eb;
-  min-height: 72px;
-}
-
-.search-group { min-width: 160px; }
-.search-group input { border: 4px solid #a6b793; max-width: 700px; }
-.search-button { background: #a6b793; color: #fff; border: 0; }
-.upload-button, .save-button { background: #465344; color: white; border: 0; }
-.upload-button:hover, .save-button:hover { background: #354335; color: white; }
-.nav-link-text { color: var(--bs-secondary); }
-.dropdown > .btn { border: none; }
 
 .edit-panel {
   max-width: 900px;
@@ -203,10 +249,19 @@ onUnmounted(() => {
 .form-control:focus, .form-select:focus { border-color: #a6b793; box-shadow: 0 0 0 0.2rem rgba(166, 183, 147, 0.2); }
 .cancel-button { color: #465344; border: 1px solid #465344; }
 .cancel-button:hover { background: #e4e9df; }
-.save-button { padding-inline: 25px; }
+.save-button {
+  background: #465344;
+  color: white;
+  border: 0;
+  padding-inline: 25px;
+}
+
+.save-button:hover {
+  background: #354335;
+  color: white;
+}
 
 @media (max-width: 767px) {
-  .focal-nav { flex-wrap: wrap; padding-block: 10px; }
   .edit-panel { border-radius: 16px; }
 }
 </style>
