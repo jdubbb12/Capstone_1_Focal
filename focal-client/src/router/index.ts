@@ -15,7 +15,10 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      alias: '/signup',
+      redirect: '/login'
+    },
+    {
+      path: '/signup',
       name: 'Signup',
       component: FocalSignup,
       meta: { guestOnly: true }
@@ -74,7 +77,7 @@ router.beforeEach((to) => {
     return { name: "Login" };
   }
   else if (to.meta.guestOnly && authStore.isAuthenticated) {
-    return { name: "CreatorProfile" };
+    return { name: "InspirationFeed" };
   }
   else {
     return true;
