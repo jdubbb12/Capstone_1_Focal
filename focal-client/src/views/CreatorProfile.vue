@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth-str'
 import api from '../services/focal-api'
-
-// Use the authentication store
-const authStore = useAuthStore();
+import MainLayout from '../layouts/MainLayout.vue'
 
 // Sample creator information from the Bootstrap Studio design.
 const fullName = ref('First & Last Name')
@@ -84,80 +81,8 @@ onMounted(() => {
 </script>
 
 <template>
+<MainLayout>
   <main class="creator-profile">
-    <!-- Navigation bar -->
-    <div class="d-flex flex-row justify-content-start align-items-center gap-3 px-4" style="background: #F5F3EB;">
-      <RouterLink to="/feed" aria-label="FOCAL Home">
-        <img height="72" src="/assets/img/Focal%20Logo.png" width="96" />
-      </RouterLink>
-
-      <div class="input-group rounded-pill flex-grow-1" style="border-width: 0px; border-color: var(--bs-secondary);">
-        <input
-          class="rounded-pill form-control"
-          placeholder="Search..."
-          style="border-width: 4px; border-color: #a6b793; max-width: 700px;"
-          type="text"
-        />
-        <button class="btn btn-primary rounded-circle" style="background: #a6b793; border-width: 0px;" type="button">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-
-      <button class="btn btn-primary" style="background: #465344; border-width: 0px;" type="button">
-        Upload
-      </button>
-
-      <RouterLink :to="{ name: 'InspirationFeed' }" class="text-decoration-none" style="color: var(--bs-secondary);">
-        Feed
-      </RouterLink>
-      <RouterLink :to="{ name: 'CreatorProfile' }" class="text-decoration-none" style="color: var(--bs-secondary);">
-        Profile
-      </RouterLink>
-
-      <div class="dropdown">
-        <button
-          class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-          style="color: var(--bs-secondary); border: none;"
-        >
-          <i class="far fa-user"></i>
-          @{{ authStore.username }}
-        </button>
-
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li>
-            <RouterLink
-              class="dropdown-item"
-              :to="{ name: 'EditProfile' }"
-            >
-              Edit Profile
-            </RouterLink>
-          </li>
-
-          <li>
-            <RouterLink
-              class="dropdown-item"
-              :to="{ name: 'BoardManagement' }"
-            >
-              Saved Boards
-            </RouterLink>
-          </li>
-
-          <li>
-            <hr class="dropdown-divider" />
-          </li>
-
-          <li>
-            <button class="dropdown-item" type="button" @click="authStore.logout()">
-              Log Out
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-
     <!-- Creator information and statistics -->
     <section class="profile-header px-4 py-4">
       <div class="row align-items-center gy-4">
@@ -219,7 +144,6 @@ onMounted(() => {
       
       <!-- User's uploaded artwork -->
       <div class="row gx-3 gy-4 row-cols-1 row-cols-md-2 row-cols-lg-4">
-
         <div
           v-for="artwork in uploadedArtwork"
           :key="artwork.artwork_id"
@@ -227,21 +151,57 @@ onMounted(() => {
         >
           <article class="card h-100 portfolio-card">
             <div class="card-body portfolio-card-body">
-              
-              <img
-                :src="`${api.defaults.baseURL}/dist/artworks/${artwork.artwork_id}/img`"
-                :alt="artwork.artwork_title || 'Uploaded artwork'"
-                class="portfolio-image"
-              />
+
+              <!-- Clickable artwork image -->
+              <RouterLink
+                :to="{ name: 'TwoDView' }"
+                class="text-decoration-none d-block"
+              >
+                <img
+                  :src="`${api.defaults.baseURL}/dist/artworks/${artwork.artwork_id}/img`"
+                  :alt="artwork.artwork_title || 'Uploaded artwork'"
+                  class="portfolio-image"
+                />
+              </RouterLink>
+
+              <!-- Artwork title and options -->
               <div class="card-title-row d-flex justify-content-between align-items-center px-2 py-1">
                 <span>{{ artwork.artwork_title }}</span>
-                <i class="fas fa-ellipsis-v"></i>
+
+                <div class="dropdown">
+                  <button
+                    class="btn p-0 border-0 text-white"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="Artwork options"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <RouterLink
+                        class="dropdown-item"
+                        :to="{ name: 'TwoDView' }"
+                      >
+                        View Artwork
+                      </RouterLink>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Artwork tag -->
+              <div class="card-tags d-flex justify-content-start">
+                <span class="badge portfolio-tag">
+                  Artwork
+                </span>
               </div>
 
             </div>
           </article>
         </div>
-
       </div>
 
       <!-- No uploaded artwork -->
@@ -251,6 +211,7 @@ onMounted(() => {
 
     </section>
   </main>
+</MainLayout>
 </template>
 
 <style scoped>
@@ -260,36 +221,10 @@ onMounted(() => {
   background: #a6b793;
 }
 
-.focal-nav {
-  background: #f5f3eb;
-  min-height: 72px;
-}
-
-.nav-search {
-  min-width: 180px;
-  max-width: 760px;
-}
-
-.nav-search input {
-  border: 4px solid #a6b793;
-  max-width: 700px;
-}
-
-.search-button {
-  background: #a6b793;
-  color: #fff;
-  border: 0;
-}
-
-.upload-button,
 .visibility-button {
   background: #465344;
   color: #fff;
   border: 0;
-}
-
-.nav-link-text {
-  color: var(--bs-secondary);
 }
 
 .profile-header {

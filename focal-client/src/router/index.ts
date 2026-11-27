@@ -6,7 +6,9 @@ import TwoDView from '../views/TwoDView.vue'
 import FocalSignup from '../views/FocalSignup.vue'
 import FocalLogin from '../views/FocalLogin.vue'
 import EditProfile from '../views/EditProfile.vue'
-import { useAuthStore } from '../stores/auth-str.ts'
+
+import { useAuthStore } from '../stores/auth-str'
+import Upload from '../views/Upload.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -51,11 +53,19 @@ const router = createRouter({
     {
       path: '/edit-profile',
       name: 'EditProfile',
+
       component: EditProfile,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/upload',
+      name: 'Upload',
+      component: Upload,
       meta: { requiresAuth: true }
     }
   ]
 })
+
 
 router.beforeEach((to) => {
   const authStore = useAuthStore();

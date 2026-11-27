@@ -3,6 +3,7 @@ import { ref, onMounted,onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/focal-api'
 import { useAuthStore } from '../stores/auth-str'
+import MainLayout from '../layouts/MainLayout.vue'
 
 const authStore = useAuthStore()
 
@@ -124,38 +125,8 @@ onUnmounted(() => {
 </script>
 
 <template>
+<MainLayout>
   <main class="edit-profile-page">
-    <!-- Focal navbar -->
-    <nav class="focal-nav d-flex flex-row justify-content-start align-items-center gap-3 px-4">
-      <RouterLink :to="{ name: 'InspirationFeed' }" aria-label="FOCAL Home">
-        <img src="/assets/img/Focal%20Logo.png" width="96" height="72" alt="FOCAL logo" />
-      </RouterLink>
-
-      <div class="input-group rounded-pill flex-grow-1 search-group">
-        <input class="form-control rounded-pill" type="search" placeholder="Search..." aria-label="Search" />
-        <button class="btn rounded-circle search-button" type="button" aria-label="Search">
-          <i class="fas fa-search" aria-hidden="true"></i>
-        </button>
-      </div>
-
-      <button class="btn upload-button" type="button">Upload</button>
-      <RouterLink :to="{ name: 'InspirationFeed' }" class="text-decoration-none nav-link-text">Feed</RouterLink>
-      <RouterLink :to="{ name: 'CreatorProfile' }" class="text-decoration-none nav-link-text">Profile</RouterLink>
-
-      <div class="dropdown">
-        <button class="btn dropdown-toggle text-nowrap d-inline-flex align-items-center gap-2 nav-link-text" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="far fa-user" aria-hidden="true"></i>
-          @{{ authStore.username }}
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><RouterLink class="dropdown-item" :to="{ name: 'EditProfile' }">Edit Profile</RouterLink></li>
-          <li><RouterLink class="dropdown-item" :to="{ name: 'BoardManagement' }">Saved Boards</RouterLink></li>
-          <li><hr class="dropdown-divider" /></li>
-          <li><button class="dropdown-item" type="button" @click="authStore.logout()">Log Out</button></li>
-        </ul>
-      </div>
-    </nav>
-
     <!-- Edit form -->
     <div class="container py-4 py-lg-5">
       <div class="edit-panel mx-auto">
@@ -244,6 +215,7 @@ onUnmounted(() => {
       </div>
     </div>
   </main>
+</MainLayout>
 </template>
 
 <style scoped>
@@ -253,19 +225,6 @@ onUnmounted(() => {
   background: #a6b793;
   color: #303830;
 }
-
-.focal-nav {
-  background: #f5f3eb;
-  min-height: 72px;
-}
-
-.search-group { min-width: 160px; }
-.search-group input { border: 4px solid #a6b793; max-width: 700px; }
-.search-button { background: #a6b793; color: #fff; border: 0; }
-.upload-button, .save-button { background: #465344; color: white; border: 0; }
-.upload-button:hover, .save-button:hover { background: #354335; color: white; }
-.nav-link-text { color: var(--bs-secondary); }
-.dropdown > .btn { border: none; }
 
 .edit-panel {
   max-width: 900px;
@@ -290,10 +249,19 @@ onUnmounted(() => {
 .form-control:focus, .form-select:focus { border-color: #a6b793; box-shadow: 0 0 0 0.2rem rgba(166, 183, 147, 0.2); }
 .cancel-button { color: #465344; border: 1px solid #465344; }
 .cancel-button:hover { background: #e4e9df; }
-.save-button { padding-inline: 25px; }
+.save-button {
+  background: #465344;
+  color: white;
+  border: 0;
+  padding-inline: 25px;
+}
+
+.save-button:hover {
+  background: #354335;
+  color: white;
+}
 
 @media (max-width: 767px) {
-  .focal-nav { flex-wrap: wrap; padding-block: 10px; }
   .edit-panel { border-radius: 16px; }
 }
 </style>
