@@ -24,7 +24,7 @@ const loginHandler = async () => {
       email: email.value,
       password: password.value,
     });
-    router.push({ name: "CreatorProfile"})
+    router.push({ name: "InspirationFeed" });
   }
   catch (err: any) {
     err.response?.data?.message || "Failed to connect to server. Try again later.";
